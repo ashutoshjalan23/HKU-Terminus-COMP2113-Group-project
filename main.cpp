@@ -26,6 +26,11 @@ void typeText(const std::string& text, int delayMs = 10) {
     std::cout << std::endl;
 }
 
+void LS(Student s){
+    std::cout<<"Locations"<<std::endl;
+    std::cout<<"Library"<<std::endl;   
+}
+
 void showAnimatedTitle() {
     clearScreen();
     std::string title[] = {
@@ -82,7 +87,7 @@ void showAnimatedTitle() {
             if (i >= center - offset && i <= center + offset) {
                 std::cout <<std::right<<std::setw(field_width) <<title[i] << std::endl;
             } else {
-                std::cout <<std::right<<std::setw(200) <<std::string(title[i].length(), ' ') << std::endl;
+                std::cout <<std::right<<std::setw(field_width) <<std::string(title[i].length(), ' ') << std::endl;
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -90,6 +95,7 @@ void showAnimatedTitle() {
 }
 
 int showMenu() {
+    
     std::cout << "\n\n";
     std::cout << BOLD << CYAN << "Welcome to HKU Terminus!" << RESET << "\n";
     std::cout << BOLD << CYAN << "Main Menu" << RESET << "\n";
@@ -158,8 +164,7 @@ void startGame() {
 // In main()
 int main() {
      
-  
-
+    
     int option = startMenu();
     
     if(option==1) {

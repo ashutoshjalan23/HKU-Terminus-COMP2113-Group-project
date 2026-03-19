@@ -17,6 +17,7 @@ class Student{
         double stamina;
         double social;
         string faculty;
+        string location;
     public:
         Student(string n, int a) {
             name = n;
