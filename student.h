@@ -70,7 +70,34 @@ class Student{
             cout << "Energy: " << energy << "\n";
             cout << "Stamina: " << stamina << "\n";
             cout << "Social: " << social << "\n\n";
-        }   
+        }
+
+        int getMoney() const {
+            return money;
+        }
+
+        void addMoney(int amount) {
+            if (amount > 0) {
+                money += amount;
+            }
+        }
+
+        void deductMoney(int amount) {
+            if (amount > 0) {
+                money -= amount;
+                if (money < 0) {
+                    money = 0;
+                }
+            }
+        }
+
+        const string& getHall() const {
+            return hall;
+        }
+
+        void setHall(const string& h) {
+            hall = h;
+        }
 };
 
 
