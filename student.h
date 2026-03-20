@@ -72,6 +72,7 @@ class Student{
             cout << "Stamina: " << stamina << "\n";
             cout << "Social: " << social << "\n\n";
         }   
+        friend class Halls;
 };
 
 

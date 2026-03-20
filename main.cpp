@@ -3,8 +3,11 @@
 #include <chrono>
 #include <cstdlib>
 #include <iomanip>
+#include <fstream>
 #include <string>
+#include <cctype>
 #include "student.h"
+#include "halls.h"
 
 // ANSI color codes
 #define RESET   "\033[0m"
@@ -14,6 +17,17 @@
 
 const int field_width = 80;
 
+const  string st_johnsFile="Halls/stjohns.txt";
+const   string shunhingFile="Halls/shunhing.txt";
+const  string rc_leeFile="Halls/rclee.txt"; 
+const  string simonFile="Halls/simon.txt";
+const  string newcollegeFile="Halls/newcollege.txt";
+
+ Halls st_johns, shunhing, rc_lee, simon, newcollege;
+
+ 
+  
+    
 void clearScreen() {
     system("clear");
 }
@@ -116,6 +130,67 @@ void showRightJustifiedLogo(const std::string& logo, int screenWidth) {
     }
 }
 
+// Helper function to trim whitespace
+std::string trim(const std::string& str) {
+    size_t start = str.find_first_not_of(" \t\n\r");
+    size_t end = str.find_last_not_of(" \t\n\r");
+    return (start == std::string::npos) ? "" : str.substr(start, end - start + 1);
+}
+
+// Remove all non-digit characters (e.g. currency symbols, commas)
+std::string removeNonNumeric(const std::string& str) {
+    std::string out;
+    for (unsigned char c : str) {
+        if (std::isdigit(c)) out.push_back(static_cast<char>(c));
+    }
+    return out;
+}
+
+void hall_init(Halls &h, const std::string& filename) {
+    std::ifstream file(filename);
+
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return;
+    }
+
+    std::string name, description, location, feesStr;
+    int fees;
+    // Read required lines and validate
+    if (!std::getline(file, name) || !std::getline(file, feesStr)
+        || !std::getline(file, description) || !std::getline(file, location)) {
+        std::cerr << "Error: Malformed or incomplete file " << filename << std::endl;
+        return;
+    }
+
+    // Trim whitespace
+    name = trim(name);
+    feesStr = trim(feesStr);
+    description = trim(description);
+    location = trim(location);
+
+    // Remove currency symbols (e.g. "$", "HK$") and other non-digits
+    feesStr = removeNonNumeric(feesStr);
+    if (feesStr.empty()) {
+        std::cerr << "Error: No numeric fees found in file " << filename << std::endl;
+        return;
+    }
+
+    try {
+        fees = std::stoi(feesStr); // Convert cleaned string to integer
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Error: Invalid fees value in file " << filename << std::endl;
+        return;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "Error: Fees value out of range in file " << filename << std::endl;
+        return;
+    }
+
+    h = Halls(name, description, fees, location);
+}
+
+
+
 int startMenu() {
     showAnimatedTitle();
     int choice;
@@ -152,17 +227,47 @@ void startGame() {
     typeText(CYAN "Dr. Chim Tat Wing: " RESET "Great! So you're " + std::to_string(age) + " years old. Let's get you started on your university journey. Remember, I'm here to help you along the way, so don't hesitate to reach out if you need any advice or assistance. Good luck, " + name + "!\n", 30);
     Student s(name, age);
 
-    typeText(CYAN"Dr. Chim Tat Wing:" RESET " Now that you've created your student profile, it's time to choose a hall to stay in. Each hall has its own unique atmosphere and facilities, so choose wisely! Here are the available halls:\n \n St. Johns College : 50,000HKD \n Lap Chee College: 30,000HKD \n RC Lee Hall: 25,000HKD \n ", 30);
+    typeText(CYAN"Dr. Chim Tat Wing:" RESET " Now that you've created your student profile, it's time to choose a hall to stay in. Each hall has its own unique atmosphere and facilities, so choose wisely! Here are the available halls:\n \n (1) St. Johns College \n (2) Shun Hing College \n (3) RC Lee Hall \n (4) Simon Hall \n (5) New College \n \n Choose the number to get more information ", 30);
     // Display hall options (this will be implemented later)
     typeText("Please enter the name of the hall you want to stay in: ", 30);
-    std::string hallChoice;
+    int hallChoice;
     std::cin >> hallChoice;
+
+    switch (hallChoice)
+    {
+    case 1:
+        st_johns.showHall(st_johns);
+        break;
+    case 2:
+        shunhing.showHall(shunhing);
+        break;
+    case 3:
+        rc_lee.showHall(rc_lee);    
+        break;
+    case 4: 
+        simon.showHall(simon);    
+        break;  
+    case 5: 
+        newcollege.showHall(newcollege);    
+        break;
+    default:
+        break;
+    }
 
 
 }
 
 // In main()
 int main() {
+    
+
+    
+
+     hall_init(st_johns, st_johnsFile);
+    hall_init(shunhing, shunhingFile);  
+    hall_init(rc_lee, rc_leeFile);
+    hall_init(simon, simonFile);
+    hall_init(newcollege, newcollegeFile);  
      
     
     int option = startMenu();
