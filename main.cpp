@@ -5,7 +5,13 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+<<<<<<< HEAD
 #include <cctype>
+=======
+#include <sstream>
+#include <fstream>
+#include <vector>
+>>>>>>> 0828251235d84869190200582449c09606a7aadd
 #include "student.h"
 #include "halls.h"
 
@@ -17,6 +23,7 @@
 
 const int field_width = 80;
 
+<<<<<<< HEAD
 const  string st_johnsFile="Halls/stjohns.txt";
 const   string shunhingFile="Halls/shunhing.txt";
 const  string rc_leeFile="Halls/rclee.txt"; 
@@ -28,6 +35,10 @@ const  string newcollegeFile="Halls/newcollege.txt";
  
   
     
+=======
+std::vector<std::string> getTitleLines();
+
+>>>>>>> 0828251235d84869190200582449c09606a7aadd
 void clearScreen() {
     system("clear");
 }
@@ -47,61 +58,22 @@ void LS(Student s){
 
 void showAnimatedTitle() {
     clearScreen();
-    std::string title[] = {
-        ".....:*******************************************************:.....",
-        ".....:*****************************+-#*++**+==***************:.....",
-        ".....:*****-#****#-----=***#=:-=+**+=-:-++******#************:.....",
-        ".....:***-=-*+****=*+==+=+#:=********+*==++=-====+=+-*=+*****:.....",
-        ".....:***=:-#***+++=+*-:***#=:==-::--=+**#***********=+***##*:.....",
-        ".....:*****=-***+-#*****===+****+==---:::::::---=====-=+*****:.....",
-        ".....:****#=--+*#==*#**==---:--:-:----=-----::+*######*******:.....",
-        ".....:******=---+%:=-=-*=::-:-:--***=-:-*-:---:---==--:--*#**:.....",
-        ".....:*******#=++**-*++=----=+******+-:-=**====++++++++---***:.....",
-        ".....:**#-:*##*%##=*-:-:*****#=*****=-:---*************+--***:.....",
-        ".....:***#==*-+=-------*******-=:===*-*+*************+-==*#**:.....",
-        ".....:**********#*#*#********#**%*******************#**#*****:.....",
-        ".....:***************************#***************************:.....",
-        ".....:*********************+=--+*#*=....:=*******************:.....",
-        ".....:**********-==+.............:.............:=*==*********:.....",
-        ".....:***+**+***=::+...........................-====*********:.....",
-        ".....:**********=::+....*..:*=*....:==*%-#==#:.-====*********:.....",
-        ".....:****+*****=:-+..*=#:=++%+=....*--%.*=-%..-====*********:.....",
-        ".....:**********=::+.:=+*:.=%+*:....*==%:*==%..-====*********:.....",
-        "......******+***=::+...::::.=%*.....:.*%*:..+:.-====*********......",
-        "......+**+******=:-=......................-....-====********=......",
-        "......:#*****+**=::+...:#.:=........-%=.::#::..-====*******#:......",
-        ".......#***+****=:-=..#=%+=+=*--...:=-+:**+*=..-====********.......",
-        ".......:#*******=:-=.:=*+:+:*-*....:-#:++==:::.-====******#........",
-        "........=*******=:-=.......:...............::..=====******=........",
-        ".........***+***=:-=........:::.....:--:.......=====******.........",
-        "..........#*****=:=*+-:=*+=======*========+***+=+===*****.:=:......",
-        ".....=+*+*+#****=+=============*###*=============++=***%*+===+=....",
-        "....===...:+%**#==============-*****===============+*#%-....--=-...",
-        "...=:.=.:*=-.*#****************=###+****************%=..-++:+:.==..",
-        ".:*:...*+..+.:*#****************###*****************#..--.:*:...:+:",
-        "*:..-+=:-+..#+**:#***+**+**+*********************#:*-*+:.*:--::...*",
-        "+::=:*.-+:-+:==...:**********+****************#*:...:+=+:.+::..:.:=",
-        ".=+.:+==+.+=.*=......=%**********#**********%=......*=.:*:.==:+:+=.",
-        "...==.:#:*.-+=::=*-....:=****+************=:....=+=::=#:.==::.+=...",
-        ".....==::...*:*.=:::++-::..:+****#****+:..::-++::+-:+..+:..:==.....",
-        ".......:*:.=.=:=:*+.*==-::-=**********+=-::-..=:+.*--*=:.-+:.......",
-        "..........==-:===.+*..#..*.:+....===:=*-:..:*::.=-:=..==-..........",
-        ".............:#=..::.=:.:=-+*::-.+*+..=:.....*-...:**:.............",
-        "................:-===:..-::.-=...+-::.:=.....:===-.................",
-        ".......................=+*+==-:::::::-==**+-......................."
-    };
+    auto title = getTitleLines();
 
-    // Fade effect from center
-    int totalLines = sizeof(title) / sizeof(title[0]);
+    int totalLines = static_cast<int>(title.size());
+    if (totalLines == 0) {
+        return;
+    }
+
     int center = totalLines / 2;
 
     for (int offset = 0; offset <= center; ++offset) {
         clearScreen();
         for (int i = 0; i < totalLines; ++i) {
             if (i >= center - offset && i <= center + offset) {
-                std::cout <<std::right<<std::setw(field_width) <<title[i] << std::endl;
+                std::cout << std::right << std::setw(field_width) << title[i] << std::endl;
             } else {
-                std::cout <<std::right<<std::setw(field_width) <<std::string(title[i].length(), ' ') << std::endl;
+                std::cout << std::right << std::setw(field_width) << std::string(title[i].length(), ' ') << std::endl;
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
@@ -130,6 +102,7 @@ void showRightJustifiedLogo(const std::string& logo, int screenWidth) {
     }
 }
 
+<<<<<<< HEAD
 // Helper function to trim whitespace
 std::string trim(const std::string& str) {
     size_t start = str.find_first_not_of(" \t\n\r");
@@ -190,6 +163,43 @@ void hall_init(Halls &h, const std::string& filename) {
 }
 
 
+=======
+bool loadLogoFromFile(const std::string& filePath, std::string& logoOut) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        return false;
+    }
+
+    std::string line;
+    std::ostringstream ss;
+    while (std::getline(file, line)) {
+        ss << line;
+        if (!file.eof()) {
+            ss << "\n";
+        }
+    }
+
+    logoOut = ss.str();
+    return true;
+}
+
+std::vector<std::string> getTitleLines() {
+    std::vector<std::string> lines;
+    std::string fileLogo;
+    if (loadLogoFromFile("HKU_logo.dat", fileLogo)) {
+        std::istringstream iss(fileLogo);
+        std::string line;
+        while (std::getline(iss, line)) {
+            lines.push_back(line);
+        }
+        return lines;
+    }
+
+    // Optional backup behavior: single-line fallback if file is missing
+    lines.push_back("HKU Terminus (file not found)");
+    return lines;
+}
+>>>>>>> 0828251235d84869190200582449c09606a7aadd
 
 int startMenu() {
     showAnimatedTitle();

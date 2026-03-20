@@ -61,6 +61,16 @@ class Student{
             energy += 20;
             stamina += 15;
         }
+
+        void deductMoney(int amount) {
+            money -= amount;
+            cout << name << " has $" << money << " left.\n";
+        }
+
+        void earnMoney(int amount) {
+            money += amount;
+            cout << name << " has earned $" << money << ".\n";
+        }
         
         void displayStatus() {
             cout << "\nStatus of " << name << ":\n";
@@ -69,6 +79,6 @@ class Student{
             cout << "Energy: " << energy << "\n";
             cout << "Stamina: " << stamina << "\n";
             cout << "Social: " << social << "\n\n";
+            cout << "Money: $" << money << "\n";
         }   
-}
-
+};

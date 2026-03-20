@@ -28,7 +28,7 @@ class Halls{
         void choose(Halls h, Student& s){
             cout << "You have chosen to stay in " << h.name << ".\n";
             cout << "Enjoy your stay at " << h.name << "!\n";
-            s.money -= h.fees;
+            s.deductMoney(h.fees);
             s.rest();
         }
 };
