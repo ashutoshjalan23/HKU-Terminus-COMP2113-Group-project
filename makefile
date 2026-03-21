@@ -1,9 +1,20 @@
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall
+TARGET = main
 
-main.o: main.cpp student.h 
-	g++ -c main.cpp
+OBJS = main.o student.o halls.o
 
-main: main.o
-	g++ main.o -o main    
+$(TARGET): $(OBJS)
+	$(CXX) $(OBJS) -o $(TARGET)
+
+main.o: main.cpp student.h halls.h
+	$(CXX) $(CXXFLAGS) -c main.cpp
+
+student.o: student.cpp student.h
+	$(CXX) $(CXXFLAGS) -c student.cpp
+
+halls.o: halls.cpp halls.h student.h
+	$(CXX) $(CXXFLAGS) -c halls.cpp
 
 clean:
 	rm -f *.o main
