@@ -71,10 +71,8 @@ class Student{
             cout << "Energy: " << energy << "\n";
             cout << "Stamina: " << stamina << "\n";
             cout << "Social: " << social << "\n\n";
-<<<<<<< HEAD
         }   
         friend class Halls;
-=======
         }
 
         int getMoney() const {
@@ -103,7 +101,6 @@ class Student{
         void setHall(const string& h) {
             hall = h;
         }
->>>>>>> 0828251235d84869190200582449c09606a7aadd
 };
 
 

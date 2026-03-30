@@ -102,7 +102,6 @@ void showRightJustifiedLogo(const std::string& logo, int screenWidth) {
     }
 }
 
-<<<<<<< HEAD
 // Helper function to trim whitespace
 std::string trim(const std::string& str) {
     size_t start = str.find_first_not_of(" \t\n\r");
@@ -163,7 +162,6 @@ void hall_init(Halls &h, const std::string& filename) {
 }
 
 
-=======
 bool loadLogoFromFile(const std::string& filePath, std::string& logoOut) {
     std::ifstream file(filePath);
     if (!file.is_open()) {
@@ -199,7 +197,6 @@ std::vector<std::string> getTitleLines() {
     lines.push_back("HKU Terminus (file not found)");
     return lines;
 }
->>>>>>> 0828251235d84869190200582449c09606a7aadd
 
 int startMenu() {
     showAnimatedTitle();
