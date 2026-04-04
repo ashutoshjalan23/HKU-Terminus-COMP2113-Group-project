@@ -1,4 +1,10 @@
 St. John's College
+<<<<<<< HEAD
 HK$50000
 Joining St. John's College, the most prestigious hall at HKU, unlocks unparalleled networking opportunities while fostering your physical and mental well-being through its vibrant, supportive community.
 Pok Fu Lam
+=======
+$25000
+Founded in 1949, St. John's College is one of the oldest halls at HKU. It offers a unique blend of traditional British collegiate system with East Asian cultural values, fostering holistic development and international-mindedness.
+Pok Fu Lam
+>>>>>>> bd766b2e59b6c90339a151cf615c28fe903efb03

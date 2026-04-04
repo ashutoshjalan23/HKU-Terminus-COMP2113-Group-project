@@ -1,4 +1,10 @@
 Shun Hing College
+<<<<<<< HEAD
 HK$40000
 Shun Hing College is the ultimate intellectual hub at HKU, where a dynamic community of scholars elevates your knowledge and sharpens your critical thinking around every corner.
 Kennedy Town
+=======
+$28000
+Shun Hing College is dedicated to nurturing students through a vibrant residential community. Emphasizing academic excellence and personal growth, it provides excellent facilities and a supportive environment for holistic development.
+Pok Fu Lam
+>>>>>>> bd766b2e59b6c90339a151cf615c28fe903efb03

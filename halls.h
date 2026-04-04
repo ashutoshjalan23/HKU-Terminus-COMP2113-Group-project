@@ -1,43 +1,30 @@
 #ifndef HALLS_H
 #define HALLS_H
+
 #include <string>
-#include <vector>   
+#include <iostream>
 #include "student.h"
 using namespace std;
 
 // Hall class definition
-class Halls{
-    private:
-        string name;
-        string description;
-        int capcaity;
-        string location;
-        int fees;
-    public:
+class Halls {
+private:
+    string name;
+    string description;
+    int fees;
+    string location;
 
-        Halls(){
+public:
+    Halls();
+    Halls(string n, string d, int f, string l);
 
-        }  //std consturctor
+    void showHall();
+    void choose(Student& s);
 
-        Halls(string n, string d, int c, string l) {
-            name = n;
-            description = d;
-            capcaity = c;
-            location = l;
-        }
-
-        void showHall(Halls h){
-            cout << "Name: " << h.name << endl;
-            cout << "Description: " << h.description << endl;
-            cout << "Fees: " << h.fees << endl;
-            cout << "Location: " << h.location << endl;
-        }
-
-        void choose(Halls h, Student& s){
-            cout << "You have chosen to stay in " << h.name << ".\n";
-            cout << "Enjoy your stay at " << h.name << "!\n";
-            s.money -= h.fees;
-            s.rest();
-        }
+    string getName() const { return name; }
+    string getDescription() const { return description; }
+    int getFees() const { return fees; }
+    string getLocation() const { return location; }
 };
-#endif 
+
+#endif

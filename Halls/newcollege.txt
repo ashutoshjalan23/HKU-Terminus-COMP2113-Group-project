@@ -1,4 +1,10 @@
 New College
+<<<<<<< HEAD
 HK$35000
 New College is HKU's powerhouse of vibrancy, where contagious energy fuels your drive and collaborative learning environments deepen your knowledge every day.
 Kennedy Town
+=======
+$27000
+New College is HKU's newest residential college, designed with modern facilities and innovative programs. It encourages interdisciplinary learning and global citizenship, preparing students for the challenges of the future.
+Pok Fu Lam
+>>>>>>> bd766b2e59b6c90339a151cf615c28fe903efb03
