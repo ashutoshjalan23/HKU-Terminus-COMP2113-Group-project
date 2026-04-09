@@ -256,7 +256,7 @@ void runLocationShell(Student& student) {
     Location* current = root;
     std::string input;
 
-    std::cout << "\nExplore HKU locations using commands like ls, cd, pwd, help, and exit." << std::endl;
+    std::cout << "\nExplore HKU locations using commands like ls, cd, pwd, help, map and exit." << std::endl;
     std::cout << "Try typing 'help' to get started." << std::endl;
 
     std::getline(std::cin, input); // clear leftover input
@@ -306,7 +306,10 @@ void runLocationShell(Student& student) {
             }
         } else if (command == "map") {
             showMap(root, current);
-        } else if (command == "help") {
+        } else if (command == "clear"){
+            clearScreen();
+        }
+        else if (command == "help") {
             std::cout << "Available commands:" << std::endl;
             std::cout << "  ls        - list locations in the current area" << std::endl;
             std::cout << "  ls -l     - list locations with descriptions" << std::endl;
@@ -362,7 +365,7 @@ void showAnimatedTitle() {
     }
 }
 
-int showMenu() {
+int show_start_Menu() {
     
     std::cout << "\n\n";
     std::cout << BOLD << CYAN << "Welcome to HKU Terminus!" << RESET << "\n";
@@ -373,7 +376,13 @@ int showMenu() {
     std::cout << "Enter your choice (1-3): ";
     
     int choice;
-    std::cin >> choice;
+    if (!(std::cin >> choice) || (choice < 1 || choice > 3)){
+        clearScreen();
+        std::cout << "Invalid choice. Press Enter to try again...";
+        cin.clear(); // Reset error flags
+        std::cin.ignore();
+        choice = show_start_Menu();
+    }
     return choice;
 }
 void showRightJustifiedLogo(const std::string& logo, int screenWidth) {
@@ -441,24 +450,6 @@ void hall_init(Halls &h, const std::string& filename) {
     }
 
     h = Halls(name, description, fees, location);
-}
-
-
-
-int startMenu() {
-    showAnimatedTitle();
-    int choice;
-    do {
-        choice = showMenu();
-        if (choice < 1 || choice > 3) {
-            std::cout << "Invalid choice. Press Enter to try again...";
-            std::cin.ignore();
-            std::cin.get();
-            clearScreen();
-            showAnimatedTitle(); // re-show title? or just menu
-        }
-    } while (choice < 1 || choice > 3);
-    return choice;
 }
 
 void startGame() {
@@ -534,8 +525,8 @@ int main() {
     hall_init(simon, simonFile);
     hall_init(newcollege, newcollegeFile);  
      
-    
-    int option = startMenu();
+    showAnimatedTitle();
+    int option = show_start_Menu();
     
     if(option==1) {
         //start new game
