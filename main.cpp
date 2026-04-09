@@ -216,6 +216,41 @@ Location* resolveLocation(Location* current, const std::string& path, Location* 
     return node;
 }
 
+void printMapTree(const Location* node, const Location* current, int depth = 0) {
+    
+    std::cout << std::endl;
+
+    std::string indent;
+    for (int i = 0; i < depth; ++i) {
+        indent += "\t";
+    }
+        if (node == current) {
+            std::cout << BOLD;
+        }
+        std::cout << indent << node->title << " [" << node->name << "]";
+        
+        if (!node->children.empty()) {
+            std::cout << " ->";
+        }
+        
+        if (node == current) {
+            std::cout << " " << "** CURRENT LOCATION **" << RESET;
+        }
+        std::cout << std::endl;
+
+    if (depth > 1)
+        std::cout << indent << "\tActivities" << std::endl;
+    
+    for (int i = 0; i < static_cast<int>(node->children.size()); ++i) {
+        printMapTree(node->children[i], current, depth + 1);
+    }
+}
+
+void showMap(Location* root, Location* current) {
+    std::cout << "Campus map:" << std::endl;
+    printMapTree(root, current, 0);
+}
+
 void runLocationShell(Student& student) {
     Location* root = buildLocationTree();
     Location* current = root;
@@ -269,6 +304,8 @@ void runLocationShell(Student& student) {
                 std::cout << "Relaxing in the garden restores your stamina." << std::endl;
                 student.rest();
             }
+        } else if (command == "map") {
+            showMap(root, current);
         } else if (command == "help") {
             std::cout << "Available commands:" << std::endl;
             std::cout << "  ls        - list locations in the current area" << std::endl;
@@ -276,6 +313,7 @@ void runLocationShell(Student& student) {
             std::cout << "  cd <path> - move to another location (use .. to go up, / for root)" << std::endl;
             std::cout << "  pwd       - show current location path" << std::endl;
             std::cout << "  look      - learn more about the current location" << std::endl;
+            std::cout << "  map       - show the full campus map" << std::endl;
             std::cout << "  status    - show your student status" << std::endl;
             std::cout << "  exit      - leave the navigation shell" << std::endl;
         } else if (command == "status") {
@@ -437,7 +475,7 @@ void startGame() {
     std::string name;
     std::cin >> name;
    
-    typeText(CYAN "Dr. Chim Tat Wing: " RESET "Nice to meet you, " + name + "! How old are you?\n", 30);
+    typeText(CYAN "Dr. Chim Tat Wing: " RESET "Nice to meet you, " + name + "! How old are you?", 30);
     int age;
     std::cin >> age;       
     typeText(CYAN "Dr. Chim Tat Wing: " RESET "Great! So you're " + std::to_string(age) + " years old. Let's get you started on your university journey. Remember, I'm here to help you along the way, so don't hesitate to reach out if you need any advice or assistance. Good luck, " + name + "!\n", 30);

@@ -18,7 +18,7 @@ bool loadAsciiArt(const std::string& fileName, std::vector<std::string>& linesOu
 
 std::vector<std::string> getAsciiArt(const std::string& artName, const std::vector<std::string>& fallback) {
     std::vector<std::string> lines;
-    if (loadAsciiArt(artName + ".dat", lines)) {
+    if (loadAsciiArt("art/" + artName + ".dat", lines)) {
         return lines;
     }
     return fallback;
