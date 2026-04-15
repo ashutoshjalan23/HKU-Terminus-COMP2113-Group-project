@@ -3,6 +3,8 @@
 
 #include <string>
 #include <iostream>
+#include<vector>
+#include "battle.h"
 using namespace std;
 
 // Student class definition
@@ -15,10 +17,9 @@ private:
     double health;
     double knowledge;
     double energy;
-    double stamina;
-    double social;
     string faculty;
     string location;
+    vector<moves> moveSet;
 
 public:
     Student(string n, int a);
@@ -35,14 +36,13 @@ public:
     void deductMoney(int amount);
     const string& getHall() const;
     void setHall(const string& h);
-
+    const vector<moves>& getMoveSet() const;
     string getName() const { return name; }
     int getAge() const { return age; }
     double getHealth() const { return health; }
     double getKnowledge() const { return knowledge; }
     double getEnergy() const { return energy; }
-    double getStamina() const { return stamina; }
-    double getSocial() const { return social; }
+
 };
 
 #endif
