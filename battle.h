@@ -27,4 +27,15 @@ public:
 
     };
 
+
+
+class fight{
+    private:
+    Student& player;
+    Student& opponent;
+    public:
+    fight(Student& p, Student& o);
+    void startBattle();
+
+};
 #endif

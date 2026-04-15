@@ -3,9 +3,23 @@
 
 #include <vector>
 #include <string>
+#include <iostream>
+#include <thread>
+#include <chrono>
 
-bool loadAsciiArt(const std::string& fileName, std::vector<std::string>& linesOut);
+using namespace std;
 
-std::vector<std::string> getAsciiArt(const std::string& artName, const std::vector<std::string>& fallback);
+// Function declarations for ASCII art operations
+vector<string> loadAsciiArt(const string& filename);
+
+void displayAsciiArtAnimated(const vector<string>& lines, int delayMs = 50, const string& color = "");
+
+void displayAsciiArt(const vector<string>& lines, const string& color = "");
+
+void displayAsciiArtRight(const vector<string>& lines, const string& color = "");
+
+void displayAsciiArtRightAnimated(const vector<string>& lines, const string& color = "", int delayMs = 50);
+
+vector<string> getTitleLines();
 
 #endif // ASCII_ART_H

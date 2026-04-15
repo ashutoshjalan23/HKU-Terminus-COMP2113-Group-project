@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -std=c++11 -Wall 
 TARGET = main
 
-OBJS = main.o student.o halls.o battle.o ascii_art.o
+OBJS = main.o student.o halls.o battle.o ascii_art.o common.o
 
 $(TARGET): $(OBJS)
 	$(CXX) $(OBJS) -o $(TARGET)
@@ -22,6 +22,8 @@ battle.o: battle.cpp battle.h student.h
 ascii_art.o: ascii_art.cpp ascii_art.h
 	$(CXX) $(CXXFLAGS) -c ascii_art.cpp
 
+common.o: common.cpp common.h
+	$(CXX) $(CXXFLAGS) -c common.cpp
 clean:
 	rm -f *.o main
 
