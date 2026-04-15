@@ -30,8 +30,78 @@
 
 const int field_width = 80;
 
+// Forward declarations
+void clearScreen();
+std::vector<std::string> loadAsciiArt(const std::string& filename) {
+    std::vector<std::string> result;
+    
+    // Try multiple possible paths (both relative and absolute)
+    std::vector<std::string> possiblePaths = {
+        "./art/" + filename + ".dat",
+        "art/" + filename + ".dat",
+        "../gp/art/" + filename + ".dat",
+        // Absolute paths for Windows
+        "d:/Ashutosh Jalan Documents/HKU/COMP2113/gp/art/" + filename + ".dat",
+        "d:\\Ashutosh Jalan Documents\\HKU\\COMP2113\\gp\\art\\" + filename + ".dat",
+        // Absolute paths for WSL
+        "/mnt/d/Ashutosh Jalan Documents/HKU/COMP2113/gp/art/" + filename + ".dat"
+    };
+    
+    for (const auto& filepath : possiblePaths) {
+        std::ifstream file(filepath);
+        if (file.is_open()) {
+            std::string line;
+            while (std::getline(file, line)) {
+                result.push_back(line);
+            }
+            file.close();
+            return result;  // Successfully loaded
+        }
+    }
+    
+    // If we get here, file not found - show which paths were tried
+    std::cerr << "Warning: Could not open ASCII art file: " << filename << ".dat" << std::endl;
+    std::cerr << "Tried paths:" << std::endl;
+    for (const auto& path : possiblePaths) {
+        std::cerr << "  - " << path << std::endl;
+    }
+    return result;
+}
+
+// Generic function to display ASCII art with animation (expanding from center)
+void displayAsciiArtAnimated(const std::vector<std::string>& lines, int delayMs = 50) {
+    int totalLines = static_cast<int>(lines.size());
+    if (totalLines == 0) {
+        return;
+    }
+
+    int center = totalLines / 2;
+
+    for (int offset = 0; offset <= center; ++offset) {
+        clearScreen();
+        for (int i = 0; i < totalLines; ++i) {
+            if (i >= center - offset && i <= center + offset) {
+                std::cout << std::right << std::setw(field_width) << lines[i] << std::endl;
+            } else {
+                std::cout << std::right << std::setw(field_width) << std::string(lines[i].length(), ' ') << std::endl;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+    }
+}
+
+// Generic function to display ASCII art without animation
+void displayAsciiArt(const std::vector<std::string>& lines) {
+    for (const auto& line : lines) {
+        std::cout << line << std::endl;
+    }
+}
+
 std::vector<std::string> getTitleLines() {
-    static const std::vector<std::string> defaultTitle = {
+    auto lines = loadAsciiArt("HKU_logo");
+    if (lines.empty()) {
+        // Fallback to default if file not found
+        static const std::vector<std::string> defaultTitle = {
         ".....:*******************************************************:.....",
         ".....:*****************************+-#*++**+==***************:.....",
         ".....:*****-#****#-----=***#=:-=+**+=-:-++******#************:.....",
@@ -73,9 +143,10 @@ std::vector<std::string> getTitleLines() {
         ".............:#=..::.=:.:=-+*::-.+*+..=:.....*-...:**:.............",
         "................:-===:..-::.-=...+-::.:=.....:===-.................",
         ".......................=+*+==-:::::::-==**+-......................."
-    };
-
-    return getAsciiArt("HKU_logo", defaultTitle);
+        };
+        lines = defaultTitle;
+    }
+    return lines;
 }
 
 const  string st_johnsFile="Halls/stjohns.txt";
@@ -326,7 +397,12 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
     current = resolveLocation(current, "main-campus", root);
     std::cout << GREEN << "Moved to " << current->title << " (" << current->getPath() << ")" << RESET << std::endl;
     std::cout<<CYAN<<"Chim Tat Wing:"<<RESET<<"Oh! Meet Marcus, He is also a first year CDS student!"<<std::endl;
-
+    auto art = loadAsciiArt("rival2");
+    if (art.empty()) {
+        std::cout << YELLOW << "[ ASCII art file 'rival.dat' not found in ./art/ directory ]" << RESET << std::endl;
+    } else {
+        displayAsciiArt(art);
+    }
 
 }
     while (true) {
@@ -411,27 +487,8 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
 }
 
 void showAnimatedTitle() {
-    clearScreen();
     auto title = getTitleLines();
-
-    int totalLines = static_cast<int>(title.size());
-    if (totalLines == 0) {
-        return;
-    }
-
-    int center = totalLines / 2;
-
-    for (int offset = 0; offset <= center; ++offset) {
-        clearScreen();
-        for (int i = 0; i < totalLines; ++i) {
-            if (i >= center - offset && i <= center + offset) {
-                std::cout << std::right << std::setw(field_width) << title[i] << std::endl;
-            } else {
-                std::cout << std::right << std::setw(field_width) << std::string(title[i].length(), ' ') << std::endl;
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    }
+    displayAsciiArtAnimated(title, 50);
 }
 
 int show_start_Menu() {
