@@ -1,7 +1,7 @@
 #include<iostream>
 #include "battle.h"
 #include "student.h"
-#include <cstdlib>
+#include <cstdlib>  
 using namespace std;
 
 moves::moves(string mt, string n, int d, int h, const vector<string>& e, string desc) {
@@ -45,32 +45,3 @@ void moves::applyEffects(Student& s, Student& opponent) {
     }
 }
 
-fight::fight(Student& p, Student& o) {
-    player=p;
-    opponent=o;
-}
-
-void fight::startBattle(){
-    cout<<"Battle starts between"<<player.getName()<< " and "<<opponent.getName()<< "!\n";
-    string playerMove, opponentMove;
-    int playerHealth=player.getHealth();
-    int opponentHealth=opponent.getHealth();
-
-    while(playerHealth>0 && opponentHealth>0){
-        cout<<player.getName()<<", choose your move: ";
-        cin>>playerMove;
-        cout<<opponent.getName()<<" chooses their move.\n";
-       
-        int opponentMoveIndex = rand() % opponent.getMoveSet().size();
-        opponentMove = opponent.getMoveSet()[opponentMoveIndex].getName();
-
-        cout<<player.getName()<<" uses "<<playerMove<<"!\n";
-        cout<<opponent.getName()<<" uses "<<opponentMove<<"!\n";
-
-        playerHealth -= rand() % 20; 
-        opponentHealth -= rand() % 20; 
-
-        cout<<player.getName()<<" has "<<playerHealth<<" health left.\n";
-        cout<<opponent.getName()<<" has "<<opponentHealth<<" health left.\n";
-    }
-}

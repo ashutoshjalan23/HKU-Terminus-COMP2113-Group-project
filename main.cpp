@@ -8,6 +8,7 @@
 #include <string>
 #include <cctype>
 #include <vector>
+
 #ifdef _WIN32
 #include <Windows.h>
 #include <mmsystem.h>
@@ -19,10 +20,12 @@
 #include <fcntl.h>
 #include <unistd.h>
 #endif
+#include "common.h"
+#include "battle.h"
+
 #include "student.h"
 #include "halls.h"
 #include "ascii_art.h"
-#include "battle.h"
 
 // ANSI color codes - Sleek & Soothing Palette
 #define RESET       "\033[0m"
@@ -37,169 +40,17 @@
 
 const int field_width = 80;
 const int SCREEN_WIDTH = 160;  // Total terminal width
-const int LEFT_WIDTH = 100;     // Left side for text
-const int RIGHT_START = 101;    // Right side starts at column 101
+
 
 // Global variables for split-screen layout
 int g_left_row = 1;            // Current row for left side output
 
-void clearScreen();
+
 
 // Position cursor at specific row and column
-void moveCursor(int row, int col) {
-    std::cout << "\033[" << row << ";" << col << "H";
-}
 
-void printLeftSide(const std::string& text) {
-    moveCursor(g_left_row, 1);
-    
-    std::string output = text.length() > LEFT_WIDTH ? text.substr(0, LEFT_WIDTH) : text;
-   if(output==text) std::cout << output << std::flush;
-   else{
-        std::cout << output << "..." << std::flush; 
-        g_left_row++;
-        std::string remaining = text.substr(LEFT_WIDTH);
-        printLeftSide(remaining); 
-   }
-    g_left_row++;
-}
-std::vector<std::string> loadAsciiArt(const std::string& filename) {
-    std::vector<std::string> result;
-    
-    // Try multiple possible paths (both relative and absolute)
-    std::vector<std::string> possiblePaths = {
-        "./art/" + filename + ".dat",
-        "art/" + filename + ".dat",
-        "../gp/art/" + filename + ".dat",
-        // Absolute paths for Windows
-        "d:/Ashutosh Jalan Documents/HKU/COMP2113/gp/art/" + filename + ".dat",
-        "d:\\Ashutosh Jalan Documents\\HKU\\COMP2113\\gp\\art\\" + filename + ".dat",
-        // Absolute paths for WSL
-        "/mnt/d/Ashutosh Jalan Documents/HKU/COMP2113/gp/art/" + filename + ".dat"
-    };
-    
-    for (const auto& filepath : possiblePaths) {
-        std::ifstream file(filepath);
-        if (file.is_open()) {
-            std::string line;
-            while (std::getline(file, line)) {
-                result.push_back(line);
-            }
-            file.close();
-            return result;  // Successfully loaded
-        }
-    }
-    
-    // If we get here, file not found - show which paths were tried
-    std::cerr << "Warning: Could not open ASCII art file: " << filename << ".dat" << std::endl;
-    std::cerr << "Tried paths:" << std::endl;
-    for (const auto& path : possiblePaths) {
-        std::cerr << "  - " << path << std::endl;
-    }
-    return result;
-}
 
-// Generic function to display ASCII art with animation (expanding from center)
-void displayAsciiArtAnimated(const std::vector<std::string>& lines, int delayMs = 50, const std::string& color = "") {
-    int totalLines = static_cast<int>(lines.size());
-    if (totalLines == 0) {
-        return;
-    }
 
-    int center = totalLines / 2;
-
-    for (int offset = 0; offset <= center; ++offset) {
-        clearScreen();
-        for (int i = 0; i < totalLines; ++i) {
-            if (i >= center - offset && i <= center + offset) {
-                if (!color.empty()) {
-                    std::cout << color;
-                }
-                std::cout << lines[i];
-                if (!color.empty()) {
-                    std::cout << RESET;
-                }
-                std::cout << std::endl;
-            } else {
-                std::cout << std::endl;
-            }
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
-    }
-}
-
-// Generic function to display ASCII art without animation
-void displayAsciiArt(const std::vector<std::string>& lines, const std::string& color = "") {
-    if (!color.empty()) {
-        std::cout << color;
-    }
-    for (const auto& line : lines) {
-        std::cout << line << std::endl;
-    }
-    if (!color.empty()) {
-        std::cout << RESET;
-    }
-}
-
-// Display ASCII art on the right side with color
-void displayAsciiArtRight(const std::vector<std::string>& lines, const std::string& color = "") {
-    int row = 1;
-    for (const auto& line : lines) {
-        moveCursor(row, RIGHT_START);
-        if (!color.empty()) {
-            std::cout << color;
-        }
-        std::cout << line << RESET;
-        row++;
-    }
-    std::cout << std::flush;
-}
-
-// Display ASCII art on the right side with glitch animation effect
-void displayAsciiArtRightAnimated(const std::vector<std::string>& lines, const std::string& color = "", int delayMs = 50) {
-    int totalLines = static_cast<int>(lines.size());
-    if (totalLines == 0) return;
-    
-    // Glitch animation: lines appear with distortion
-    for (int frame = 0; frame < totalLines + 5; frame++) {
-        for (int i = 0; i < totalLines; i++) {
-            moveCursor(i + 1, RIGHT_START);
-            
-            // Determine if this line should be displayed and with what effect
-            if (i < frame) {
-                // Line is visible
-                if (!color.empty()) std::cout << color;
-                
-                // Random glitch effect on some frames
-                if (frame < totalLines && rand() % 3 == 0) {
-                    // Glitch: offset some characters
-                    std::string glitched = lines[i];
-                    int glitchPos = rand() % glitched.length();
-                    if (glitchPos > 0) {
-                        glitched[glitchPos] = '█';
-                    }
-                    std::cout << glitched;
-                } else {
-                    // Normal display
-                    std::cout << lines[i];
-                }
-                
-                if (!color.empty()) std::cout << RESET;
-            }
-            std::cout << std::flush;
-        }
-        
-        std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
-    }
-}
-
-std::vector<std::string> getTitleLines() {
-    auto lines = loadAsciiArt("HKU_logo");
-     if (lines.empty()) {
-        lines.push_back("[ ASCII art file 'HKU_logo.dat' not found in ./art/ directory ]");
-    }
-    return lines;
-}
 
 const  string st_johnsFile="Halls/stjohns.txt";
 const   string shunhingFile="Halls/shunhing.txt";
@@ -212,9 +63,7 @@ const  string newcollegeFile="Halls/newcollege.txt";
  
   
     
-void clearScreen() {
-    system("clear");
-}
+
 
 void typeText(const std::string& text, int delayMs = 10) {
     bool skipAnimation = false;

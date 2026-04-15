@@ -30,7 +30,7 @@ void Halls::showHall() {
 void Halls::choose(Student& s) {
     cout << "You have chosen to stay in " << name << ".\n";
     cout << "Enjoy your stay at " << name << "!\n";
-    s.deductMoney(fees);   // Deduct hall fees from the student’s money
-    s.rest();              // Student rests after checking in
-    s.setHall(name);       // Set the student’s residence to this hall
+    s.deductMoney(fees);
+    s.rest();
+    s.setHall(name);
 }

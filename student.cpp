@@ -1,5 +1,6 @@
 #include <iostream>
 #include "student.h"
+#include "battle.h"
 using namespace std;
 
 // Constructor: initializes a Student object with default values
@@ -22,37 +23,32 @@ Student::Student(string n, int a) {
 
 
 
-// Simulates studying independently
+
 void Student::study() {
     cout << name << " is studying.\n";
-    knowledge += 5;   // Gain more knowledge than lecture
-    energy -= 30;     // Higher energy cost
-        // Higher stamina cost
+    knowledge += 5;   
+    energy -= 30;     
+    
 }
 
-// Simulates eating to recover health and energy
 void Student::eat() {
     cout << name << " is eating.\n";
-    health += 20;     // Increase health
-    energy += 30;     // Restore energy
+    health += 20;     
+    energy += 30;     
 }
 
-// Simulates social interaction
-void Student::socialize() {
-    cout << name << " is socializing with friends.\n";
-      // Increase social level
-    energy -= 10;     // Small energy cost
-}
+
+
 
 // Simulates resting to recover stats
 void Student::rest() {
     cout << name << " is resting.\n";
-    health += 10;     // Recover some health
-    energy += 20;     // Recover energy
-       // Recover stamina
+    health += 10;     
+    energy += 20;     
+       
 }
 
-// Displays the current status of the student
+
 void Student::displayStatus() {
     cout << "\nStatus of " << name << ":\n";
     cout << "Health: " << health << "\n";
@@ -62,19 +58,17 @@ void Student::displayStatus() {
     cout << "Money: $" << money << "\n\n";
 }
 
-// Returns the current amount of money
 int Student::getMoney() const {
     return money;
 }
 
-// Adds money to the student's balance (only if positive)
 void Student::addMoney(int amount) {
     if (amount > 0) {
         money += amount;
     }
 }
 
-// Deducts money from the student's balance (ensures it doesn't go below 0)
+
 void Student::deductMoney(int amount) {
     if (amount > 0) {
         money -= amount;
@@ -93,3 +87,8 @@ const string& Student::getHall() const {
 void Student::setHall(const string& h) {
     hall = h;
 }
+
+const vector<moves>& Student::getMoveSet() const {
+    return moveSet;
+}
+    
