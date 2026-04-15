@@ -21,7 +21,7 @@
 
 // ANSI color codes
 #define RESET   "\033[0m"
-#define GREEN   "\033[32m"
+#define GREEN   "\033[1;32m"  // Bright matrix green
 #define CYAN    "\033[36m"
 #define BOLD    "\033[1m"
 #define RED     "\033[31m"
@@ -29,9 +29,29 @@
 #define MAGENTA "\033[35m"
 
 const int field_width = 80;
+const int SCREEN_WIDTH = 160;  // Total terminal width
+const int LEFT_WIDTH = 79;     // Left side for text
+const int RIGHT_START = 80;    // Right side starts at column 80
+
+// Global variables for split-screen layout
+int g_left_row = 1;            // Current row for left side output
 
 // Forward declarations
 void clearScreen();
+
+// Position cursor at specific row and column
+void moveCursor(int row, int col) {
+    std::cout << "\033[" << row << ";" << col << "H";
+}
+
+// Print text on the left side, respecting column boundaries
+void printLeftSide(const std::string& text) {
+    moveCursor(g_left_row, 1);
+    // Truncate to LEFT_WIDTH
+    std::string output = text.length() > LEFT_WIDTH ? text.substr(0, LEFT_WIDTH) : text;
+    std::cout << output << std::flush;
+    g_left_row++;
+}
 std::vector<std::string> loadAsciiArt(const std::string& filename) {
     std::vector<std::string> result;
     
@@ -69,7 +89,7 @@ std::vector<std::string> loadAsciiArt(const std::string& filename) {
 }
 
 // Generic function to display ASCII art with animation (expanding from center)
-void displayAsciiArtAnimated(const std::vector<std::string>& lines, int delayMs = 50) {
+void displayAsciiArtAnimated(const std::vector<std::string>& lines, int delayMs = 50, const std::string& color = "") {
     int totalLines = static_cast<int>(lines.size());
     if (totalLines == 0) {
         return;
@@ -81,9 +101,16 @@ void displayAsciiArtAnimated(const std::vector<std::string>& lines, int delayMs 
         clearScreen();
         for (int i = 0; i < totalLines; ++i) {
             if (i >= center - offset && i <= center + offset) {
-                std::cout << std::right << std::setw(field_width) << lines[i] << std::endl;
+                if (!color.empty()) {
+                    std::cout << color;
+                }
+                std::cout << lines[i];
+                if (!color.empty()) {
+                    std::cout << RESET;
+                }
+                std::cout << std::endl;
             } else {
-                std::cout << std::right << std::setw(field_width) << std::string(lines[i].length(), ' ') << std::endl;
+                std::cout << std::endl;
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
@@ -91,10 +118,30 @@ void displayAsciiArtAnimated(const std::vector<std::string>& lines, int delayMs 
 }
 
 // Generic function to display ASCII art without animation
-void displayAsciiArt(const std::vector<std::string>& lines) {
+void displayAsciiArt(const std::vector<std::string>& lines, const std::string& color = "") {
+    if (!color.empty()) {
+        std::cout << color;
+    }
     for (const auto& line : lines) {
         std::cout << line << std::endl;
     }
+    if (!color.empty()) {
+        std::cout << RESET;
+    }
+}
+
+// Display ASCII art on the right side with color
+void displayAsciiArtRight(const std::vector<std::string>& lines, const std::string& color = "") {
+    int row = 1;
+    for (const auto& line : lines) {
+        moveCursor(row, RIGHT_START);
+        if (!color.empty()) {
+            std::cout << color;
+        }
+        std::cout << line << RESET;
+        row++;
+    }
+    std::cout << std::flush;
 }
 
 std::vector<std::string> getTitleLines() {
@@ -395,18 +442,32 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
         std::getline(std::cin, input);
     }
     current = resolveLocation(current, "main-campus", root);
-    std::cout << GREEN << "Moved to " << current->title << " (" << current->getPath() << ")" << RESET << std::endl;
-    std::cout<<CYAN<<"Chim Tat Wing:"<<RESET<<"Oh! Meet Marcus, He is also a first year CDS student!"<<std::endl;
+    
+    // Split-screen display for meeting Marcus
+    clearScreen();
+    g_left_row = 1;  // Reset left-side row counter
+    
+    printLeftSide(std::string(GREEN) + "Moved to " + current->title + " (" + current->getPath() + ")" + RESET);
+    printLeftSide(std::string(CYAN) + "Chim Tat Wing:" + RESET + " Oh! Meet Marcus, He is also a first year CDS student!");
+    
     auto art = loadAsciiArt("rival2");
     if (art.empty()) {
-        std::cout << YELLOW << "[ ASCII art file 'rival.dat' not found in ./art/ directory ]" << RESET << std::endl;
+        printLeftSide(std::string(YELLOW) + "[ ASCII art file 'rival2.dat' not found in ./art/ directory ]" + RESET);
     } else {
-        displayAsciiArt(art);
+        // Display ASCII art on the right side of the screen
+        displayAsciiArtRight(art, GREEN);
     }
+    // Dialogue and ASCII art remain on screen - shell continues below
 
 }
     while (true) {
-        std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA << "$ " << RESET;
+        // Continue on the left side for shell prompt
+        std::string prompt = std::string(BOLD) + MAGENTA + "hku:" + CYAN + current->getPath() + MAGENTA + "$ " + RESET;
+        moveCursor(g_left_row, 1);
+        std::cout << prompt << std::flush;
+        g_left_row++;
+        
+        std::string input;
         std::getline(std::cin, input);
         input = trim(input);
         if (input.empty()) {
@@ -420,9 +481,21 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
         if (command == "ls") {
             std::string flag;
             iss >> flag;
-            printLocationListing(current, flag == "-l");
+            // For ls, we need to modify printLocationListing to use positioned printing temporarily
+            if (current->children.empty()) {
+                printLeftSide(std::string(RED) + "No sub-locations here." + RESET);
+            } else {
+                for (const Location* child : current->children) {
+                    if (flag == "-l") {
+                        std::string listing = std::string(GREEN) + child->name + RESET + " - " + BOLD + child->title + RESET + ": " + child->description;
+                        printLeftSide(listing);
+                    } else {
+                        printLeftSide(std::string(GREEN) + child->name + RESET);
+                    }
+                }
+            }
         } else if (command == "pwd") {
-            std::cout << GREEN << current->getPath() << RESET << std::endl;
+            printLeftSide(std::string(GREEN) + current->getPath() + RESET);
         } else if (command == "cd") {
             std::string target;
             iss >> target;
@@ -432,45 +505,46 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
             }
             Location* next = resolveLocation(current, target, root);
             if (next == nullptr) {
-                std::cout << RED << "No such location: " << target << RESET << std::endl;
+                printLeftSide(std::string(RED) + "No such location: " + target + RESET);
             } else {
                 current = next;
-                std::cout << GREEN << "Moved to " << current->title << " (" << current->getPath() << ")" << RESET << std::endl;
+                printLeftSide(std::string(GREEN) + "Moved to " + current->title + " (" + current->getPath() + ")" + RESET);
             }
         } else if (command == "look") {
-            std::cout << BOLD << CYAN << current->title << RESET << " - " << current->description << std::endl;
+            printLeftSide(std::string(BOLD) + CYAN + current->title + RESET + " - " + current->description);
             if (current->name == "library") {
-                std::cout << YELLOW << "You can study here to increase your knowledge." << RESET << std::endl;
+                printLeftSide(std::string(YELLOW) + "You can study here to increase your knowledge." + RESET);
                 student.study();
             } else if (current->name == "canteen") {
-                std::cout << YELLOW << "A good place to eat and recover energy." << RESET << std::endl;
+                printLeftSide(std::string(YELLOW) + "A good place to eat and recover energy." + RESET);
                 student.eat();
             } else if (current->name == "garden") {
-                std::cout << YELLOW << "Relaxing in the garden restores your stamina." << RESET << std::endl;
+                printLeftSide(std::string(YELLOW) + "Relaxing in the garden restores your stamina." + RESET);
                 student.rest();
             }
         } else if (command == "map") {
             showMap(root, current);
         } else if (command == "clear"){
             clearScreen();
+            g_left_row = 1;
         }
         else if (command == "help") {
-            std::cout << BOLD << CYAN << "Available commands:" << RESET << std::endl;
-            std::cout << GREEN << "  ls        " << RESET << "- list locations in the current area" << std::endl;
-            std::cout << GREEN << "  ls -l     " << RESET << "- list locations with descriptions" << std::endl;
-            std::cout << GREEN << "  cd <path> " << RESET << "- move to another location (use .. to go up, / for root)" << std::endl;
-            std::cout << GREEN << "  pwd       " << RESET << "- show current location path" << std::endl;
-            std::cout << GREEN << "  look      " << RESET << "- learn more about the current location" << std::endl;
-            std::cout << GREEN << "  map       " << RESET << "- show the full campus map" << std::endl;
-            std::cout << GREEN << "  status    " << RESET << "- show your student status" << std::endl;
-            std::cout << GREEN << "  exit      " << RESET << "- leave the navigation shell" << std::endl;
+            printLeftSide(std::string(BOLD) + CYAN + "Available commands:" + RESET);
+            printLeftSide(std::string(GREEN) + "  ls        " + RESET + "- list locations in the current area");
+            printLeftSide(std::string(GREEN) + "  ls -l     " + RESET + "- list locations with descriptions");
+            printLeftSide(std::string(GREEN) + "  cd <path> " + RESET + "- move to another location (use .. to go up, / for root)");
+            printLeftSide(std::string(GREEN) + "  pwd       " + RESET + "- show current location path");
+            printLeftSide(std::string(GREEN) + "  look      " + RESET + "- learn more about the current location");
+            printLeftSide(std::string(GREEN) + "  map       " + RESET + "- show the full campus map");
+            printLeftSide(std::string(GREEN) + "  status    " + RESET + "- show your student status");
+            printLeftSide(std::string(GREEN) + "  exit      " + RESET + "- leave the navigation shell");
         } else if (command == "status") {
             student.displayStatus();
         } else if (command == "exit" || command == "quit") {
-            std::cout << YELLOW << "Exiting HKU navigation." << RESET << std::endl;
+            printLeftSide(std::string(YELLOW) + "Exiting HKU navigation." + RESET);
             break;
         } else {
-            std::cout << RED << "Unknown command: " << command << ". Type help for a list of commands." << RESET << std::endl;
+            printLeftSide(std::string(RED) + "Unknown command: " + command + ". Type help for a list of commands." + RESET);
         }
     }
 
