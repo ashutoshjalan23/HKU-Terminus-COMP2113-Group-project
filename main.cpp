@@ -9,6 +9,11 @@
 #include <cctype>
 #include <vector>
 #ifdef _WIN32
+#include <Windows.h>
+#include <mmsystem.h>
+#pragma comment(lib, "winmm.lib")
+#endif
+#ifdef _WIN32
 #include <conio.h>
 #else
 #include <fcntl.h>
@@ -19,19 +24,21 @@
 #include "ascii_art.h"
 #include "battle.h"
 
-// ANSI color codes
-#define RESET   "\033[0m"
-#define GREEN   "\033[1;32m"  // Bright matrix green
-#define CYAN    "\033[36m"
-#define BOLD    "\033[1m"
-#define RED     "\033[31m"
-#define YELLOW  "\033[33m"
-#define MAGENTA "\033[35m"
+// ANSI color codes - Sleek & Soothing Palette
+#define RESET       "\033[0m"
+#define GREEN       "\033[38;5;120m"  // Soft mint green
+#define CYAN        "\033[38;5;110m"  // Soft teal
+#define BOLD        "\033[1m"
+#define RED         "\033[38;5;210m"  // Soft coral red
+#define YELLOW      "\033[38;5;179m"  // Soft gold
+#define MAGENTA     "\033[38;5;176m"  // Soft lavender
+#define BLUE        "\033[38;5;117m"  // Soft sky blue
+#define PURPLE      "\033[38;5;139m"  // Soft purple
 
 const int field_width = 80;
 const int SCREEN_WIDTH = 160;  // Total terminal width
-const int LEFT_WIDTH = 79;     // Left side for text
-const int RIGHT_START = 80;    // Right side starts at column 80
+const int LEFT_WIDTH = 100;     // Left side for text
+const int RIGHT_START = 101;    // Right side starts at column 101
 
 // Global variables for split-screen layout
 int g_left_row = 1;            // Current row for left side output
@@ -49,7 +56,13 @@ void printLeftSide(const std::string& text) {
     moveCursor(g_left_row, 1);
     // Truncate to LEFT_WIDTH
     std::string output = text.length() > LEFT_WIDTH ? text.substr(0, LEFT_WIDTH) : text;
-    std::cout << output << std::flush;
+   if(output==text) std::cout << output << std::flush;
+   else{
+        std::cout << output << "..." << std::flush; 
+        g_left_row++;
+        std::string remaining = text.substr(LEFT_WIDTH);
+        printLeftSide(remaining); 
+   }
     g_left_row++;
 }
 std::vector<std::string> loadAsciiArt(const std::string& filename) {
@@ -146,52 +159,8 @@ void displayAsciiArtRight(const std::vector<std::string>& lines, const std::stri
 
 std::vector<std::string> getTitleLines() {
     auto lines = loadAsciiArt("HKU_logo");
-    if (lines.empty()) {
-        // Fallback to default if file not found
-        static const std::vector<std::string> defaultTitle = {
-        ".....:*******************************************************:.....",
-        ".....:*****************************+-#*++**+==***************:.....",
-        ".....:*****-#****#-----=***#=:-=+**+=-:-++******#************:.....",
-        ".....:***-=-*+****=*+==+=+#:=********+*==++=-====+=+-*=+*****:.....",
-        ".....:***=:-#***+++=+*-:***#=:==-::--=+**#***********=+***##*:.....",
-        ".....:*****=-***+-#*****===+****+==---:::::::---=====-=+*****:.....",
-        ".....:****#=--+*#==*#**==---:--:-:----=-----::+*######*******:.....",
-        ".....:******=---+%:=-=-*=::-:-:--***=-:-*-:---:---==--:--*#**:.....",
-        ".....:*******#=++**-*++=----=+******+-:-=**====++++++++---***:.....",
-        ".....:**#-:*##*%##=*-:-:*****#=*****=-:---*************+--***:.....",
-        ".....:***#==*-+=-------*******-=:===*-*+*************+-==*#**:.....",
-        ".....:**********#*#*#********#**%*******************#**#*****:.....",
-        ".....:***************************#***************************:.....",
-        ".....:*********************+=--+*#*=....:=*******************:.....",
-        ".....:**********-==+.............:.............:=*==*********:.....",
-        ".....:***+**+***=::+...........................-====*********:.....",
-        ".....:**********=::+....*..:*=*....:==*%-#==#:.-====*********:.....",
-        ".....:****+*****=:-+..*=#:=++%+=....*--%.*=-%..-====*********:.....",
-        ".....:**********=::+.:=+*:.=%+*:....*==%:*==%..-====*********:.....",
-        "......******+***=::+...::::.=%*.....:.*%*:..+:.-====*********......",
-        "......+**+******=:-=......................-....-====********=......",
-        "......:#*****+**=::+...:#.:=........-%=.::#::..-====*******#:......",
-        ".......#***+****=:-=..#=%+=+=*--...:=-+:**+*=..-====********.......",
-        ".......:#*******=:-=.:=*+:+:*-*....:-#:++==:::.-====******#........",
-        "........=*******=:-=.......:...............::..=====******=........",
-        ".........***+***=:-=........:::.....:--:.......=====******.........",
-        "..........#*****=:=*+-:=*+=======*========+***+=+===*****.:=:......",
-        ".....=+*+*+#****=+=============*###*=============++=***%*+===+=....",
-        "....===...:+%**#==============-*****===============+*#%-....--=-...",
-        "...=:.=.:*=-.*#****************=###+****************%=..-++:+:.==..",
-        ".:*:...*+..+.:*#****************###*****************#..--.:*:...:+:",
-        "*:..-+=:-+..#+**:#***+**+**+*********************#:*-*+:.*:--::...*",
-        "+::=:*.-+:-+:==...:**********+****************#*:...:+=+:.+::..:.:=",
-        ".=+.:+==+.+=.*=......=%**********#**********%=......*=.:*:.==:+:+=.",
-        "...==.:#:*.-+=::=*-....:=****+************=:....=+=::=#:.==::.+=...",
-        ".....==::...*:*.=:::++-::..:+****#****+:..::-++::+-:+..+:..:==.....",
-        ".......:*:.=.=:=:*+.*==-::-=**********+=-::-..=:+.*--*=:.-+:.......",
-        "..........==-:===.+*..#..*.:+....===:=*-:..:*::.=-:=..==-..........",
-        ".............:#=..::.=:.:=-+*::-.+*+..=:.....*-...:**:.............",
-        "................:-===:..-::.-=...+-::.:=.....:===-.................",
-        ".......................=+*+==-:::::::-==**+-......................."
-        };
-        lines = defaultTitle;
+     if (lines.empty()) {
+        lines.push_back("[ ASCII art file 'HKU_logo.dat' not found in ./art/ directory ]");
     }
     return lines;
 }
@@ -449,7 +418,6 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
     
     printLeftSide(std::string(GREEN) + "Moved to " + current->title + " (" + current->getPath() + ")" + RESET);
     printLeftSide(std::string(CYAN) + "Chim Tat Wing:" + RESET + " Oh! Meet Marcus, He is also a first year CDS student!");
-    
     auto art = loadAsciiArt("rival2");
     if (art.empty()) {
         printLeftSide(std::string(YELLOW) + "[ ASCII art file 'rival2.dat' not found in ./art/ directory ]" + RESET);
@@ -659,22 +627,39 @@ void startGame() {
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     clearScreen();
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    typeText("Welcome to the prestigious " CYAN "University of Hong Kong!" RESET "    You are about to embark on an exciting journey as a student at HKU.\nYour choices will shape your university experience, so choose wisely and enjoy your time at HKU!\n\n", 30);
-    typeText(CYAN "Dr. Chim Tat Wing:" RESET " Hello there! Welcome to HKU. I'm Dr. Chim Tat Wing, your friendly advisor. I'm here to help you navigate your university life and make the most of your time here. Feel free to ask me anything or seek advice whenever you need it. Let's make your HKU experience unforgettable!\"\n\n", 30);
-    typeText(CYAN "Dr. Chim Tat Wing: " RESET "What's your name, student?", 30);
+    g_left_row = 1;
+    
+    printLeftSide(std::string(GREEN) + "Welcome to the prestigious " + CYAN + "University of Hong Kong!" + RESET + "    You are about to embark on an exciting journey as a student at HKU.\nYour choices will shape your university experience, so choose wisely and enjoy your time at HKU!\n\n");
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing:" + RESET + " Hello there! Welcome to HKU. I'm Dr. Chim Tat Wing, your friendly advisor. I'm here to help you navigate your university life and make the most of your time here. Feel free to ask me anything or seek advice whenever you need it. Let's make your HKU experience unforgettable!\n\n");
+    
+    auto art = loadAsciiArt("HKU_logo");
+    if (art.empty()) {
+        printLeftSide(std::string(YELLOW) + "[ ASCII art file 'HKU_logo.dat' not found in ./art/ directory ]" + RESET);
+    } else {
+        displayAsciiArtRight(art, CYAN);
+    }
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "What's your name, student?");
     
     std::string name;
     std::cin >> name;
    
-    typeText(CYAN "Dr. Chim Tat Wing: " RESET "Nice to meet you, " + name + "! How old are you?", 30);
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "Nice to meet you, " + name + "! How old are you?");
     int age;
     std::cin >> age;       
-    typeText(CYAN "Dr. Chim Tat Wing: " RESET "Great! So you're " + std::to_string(age) + " years old. Let's get you started on your university journey. Remember, I'm here to help you along the way, so don't hesitate to reach out if you need any advice or assistance. Good luck, " + name + "!\n", 30);
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "Great! So you're " + std::to_string(age) + " years old. Let's get you started on your university journey. Remember, I'm here to help you along the way, so don't hesitate to reach out if you need any advice or assistance. Good luck, " + name + "!");
     Student s(name, age);
 
-    typeText(CYAN"Dr. Chim Tat Wing:" RESET " Now that you've created your student profile, it's time to choose a hall to stay in. Each hall has its own unique atmosphere and facilities, so choose wisely! Here are the available halls:\n \n (1) St. Johns College \n (2) Shun Hing College \n (3) RC Lee Hall \n (4) Simon Hall \n (5) New College \n \n Choose the number to get more information ", 30);
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing:" + RESET + " Now that you've created your student profile, it's time to choose a hall to stay in. Each hall has its own unique atmosphere and facilities, so choose wisely! Here are the available halls:");
+    printLeftSide("(1) St. Johns College");
+    printLeftSide("(2) Shun Hing College");
+    printLeftSide("(3) RC Lee Hall");
+    printLeftSide("(4) Simon Hall");
+    printLeftSide("(5) New College");
+    printLeftSide("Choose the number to get more information:");
     // Display hall options
-    typeText("Please enter the number of the hall you want to stay in: ", 30);
+    std::cout << "Enter your choice (1-5): ";
     int hallChoice;
     std::cin >> hallChoice;
 
