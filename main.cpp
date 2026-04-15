@@ -43,7 +43,6 @@ const int RIGHT_START = 101;    // Right side starts at column 101
 // Global variables for split-screen layout
 int g_left_row = 1;            // Current row for left side output
 
-// Forward declarations
 void clearScreen();
 
 // Position cursor at specific row and column
@@ -51,10 +50,9 @@ void moveCursor(int row, int col) {
     std::cout << "\033[" << row << ";" << col << "H";
 }
 
-// Print text on the left side, respecting column boundaries
 void printLeftSide(const std::string& text) {
     moveCursor(g_left_row, 1);
-    // Truncate to LEFT_WIDTH
+    
     std::string output = text.length() > LEFT_WIDTH ? text.substr(0, LEFT_WIDTH) : text;
    if(output==text) std::cout << output << std::flush;
    else{
@@ -155,6 +153,44 @@ void displayAsciiArtRight(const std::vector<std::string>& lines, const std::stri
         row++;
     }
     std::cout << std::flush;
+}
+
+// Display ASCII art on the right side with glitch animation effect
+void displayAsciiArtRightAnimated(const std::vector<std::string>& lines, const std::string& color = "", int delayMs = 50) {
+    int totalLines = static_cast<int>(lines.size());
+    if (totalLines == 0) return;
+    
+    // Glitch animation: lines appear with distortion
+    for (int frame = 0; frame < totalLines + 5; frame++) {
+        for (int i = 0; i < totalLines; i++) {
+            moveCursor(i + 1, RIGHT_START);
+            
+            // Determine if this line should be displayed and with what effect
+            if (i < frame) {
+                // Line is visible
+                if (!color.empty()) std::cout << color;
+                
+                // Random glitch effect on some frames
+                if (frame < totalLines && rand() % 3 == 0) {
+                    // Glitch: offset some characters
+                    std::string glitched = lines[i];
+                    int glitchPos = rand() % glitched.length();
+                    if (glitchPos > 0) {
+                        glitched[glitchPos] = '█';
+                    }
+                    std::cout << glitched;
+                } else {
+                    // Normal display
+                    std::cout << lines[i];
+                }
+                
+                if (!color.empty()) std::cout << RESET;
+            }
+            std::cout << std::flush;
+        }
+        
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
+    }
 }
 
 std::vector<std::string> getTitleLines() {
@@ -417,19 +453,40 @@ std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA 
     g_left_row = 1;  // Reset left-side row counter
     
     printLeftSide(std::string(GREEN) + "Moved to " + current->title + " (" + current->getPath() + ")" + RESET);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     printLeftSide(std::string(CYAN) + "Chim Tat Wing:" + RESET + " Oh! Meet Marcus, He is also a first year CDS student!");
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    
+    // Play Marcus encounter music (cross-platform)
+    #ifdef _WIN32
+    PlaySound(TEXT("audio/meet_marcus.wav"), NULL, SND_FILENAME | SND_ASYNC);
+    #else
+    system("mpv audio/meet_marcus.wav > /dev/null 2>&1 &");
+    #endif
+    
     auto art = loadAsciiArt("rival2");
     if (art.empty()) {
         printLeftSide(std::string(YELLOW) + "[ ASCII art file 'rival2.dat' not found in ./art/ directory ]" + RESET);
     } else {
-        // Display ASCII art on the right side of the screen
-        displayAsciiArtRight(art, GREEN);
+        // Display ASCII art on the right side with glitch animation
+        displayAsciiArtRightAnimated(art, GREEN, 40);
     }
     // Dialogue and ASCII art remain on screen - shell continues below
 
 }
+// Pause before Marcus's challenge
+    printLeftSide(std::string(RED) + "Marcus:" + RESET + "Ugh! Another first year! You think you can survive in HKU? Let's see your CS skills! \n" + RESET);
+
+
+
+typeText(std::string(BOLD) + RED + "Marcus challenges you to a coding battle!" + RESET, 30);
+
+std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+
+clearScreen();
+
     while (true) {
-        // Continue on the left side for shell prompt
+        
         std::string prompt = std::string(BOLD) + MAGENTA + "hku:" + CYAN + current->getPath() + MAGENTA + "$ " + RESET;
         moveCursor(g_left_row, 1);
         std::cout << prompt << std::flush;
