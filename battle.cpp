@@ -2,6 +2,7 @@
 #include "battle.h"
 #include "student.h"
 #include <cstdlib>  
+#include<fstream>
 using namespace std;
 
 moves::moves(string mt, string n, int d, int h, const vector<string>& e, string desc) {
@@ -45,3 +46,43 @@ void moves::applyEffects(Student& s, Student& opponent) {
     }
 }
 
+string moves::getName() const {
+    return name;
+}
+
+fight::fight(Student& player, Student& opp) : player(player), opponent(opp) {
+}
+
+void fight::startBattle(){
+  const char filename[100]="art/arena.txt";
+  ifstream fin(filename);
+
+
+string line;
+while(getline(fin,line)){
+    cout<<line<<endl;
+}
+
+while(player.getHealth()>0 && opponent.getHealth()>0){
+
+vector<moves> playerMoves = player.getMoveSet();
+        
+cout<<"\033[2;10H";
+cout<<"Player HP: "<<player.getHealth()<<flush;
+
+cout<<"\033[2;20H";
+cout<<"Opponent HP: "<<opponent.getHealth()<<flush;
+
+cout<<"\033[11;10H";
+cout<<"Choose your move: "<<flush;
+cout<<"\033[12;10H";
+
+for(const moves& i: playerMoves){
+    cout<<i.getName()<<"  "<<endl;
+
+}
+
+
+
+}
+}
