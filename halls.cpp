@@ -1,5 +1,6 @@
 #include <iostream>
 #include "halls.h"
+#include "common.h"
 using namespace std;
 
 // Default constructor: initializes a Halls object with empty/zero values
@@ -20,16 +21,16 @@ Halls::Halls(string n, string d, int f, string l) {
 
 // Displays the hall’s details to the console
 void Halls::showHall() {
-    cout << "Name: " << name << endl;
-    cout << "Description: " << description << endl;
-    cout << "Fees: " << fees << endl;
-    cout << "Location: " << location << endl;
+    printLeftSide("Name: " + name);
+    printLeftSide("Description: " + description);
+    printLeftSide("Fees: " + to_string(fees));
+    printLeftSide("Location: " + location);
 }
 
 // Lets the student choose this hall and applies the effects
 void Halls::choose(Student& s) {
-    cout << "You have chosen to stay in " << name << ".\n";
-    cout << "Enjoy your stay at " << name << "!\n";
+    printLeftSide("You have chosen to stay in " + name + ".");
+    printLeftSide("Enjoy your stay at " + name + "!");
     s.deductMoney(fees);
     s.rest();
     s.setHall(name);

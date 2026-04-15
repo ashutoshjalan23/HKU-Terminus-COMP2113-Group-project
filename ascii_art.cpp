@@ -1,34 +1,86 @@
 #include "ascii_art.h"
+#include "common.h"
 #include <fstream>
 #include <string>
 #include <vector>
 #include <iostream>
 #include <cstdlib>
+#include <algorithm>
 
 using namespace std;
-
-// Forward declarations for external functions/constants from main.cpp
-extern void clearScreen();
-extern void moveCursor(int row, int col);
-extern const int RIGHT_START;
 
 // Color codes
 #define RESET       "\033[0m"
 #define CYAN        "\033[38;5;110m"
 
+static void clearRightPane() {
+    updateTerminalLayout();
+    int rightPaneWidth = max(1, TERMINAL_WIDTH - RIGHT_START + 1);
+    for (int row = 1; row <= TERMINAL_HEIGHT; ++row) {
+        moveCursor(row, RIGHT_START);
+        cout << string(rightPaneWidth, ' ');
+    }
+    cout << flush;
+}
+
+static vector<string> scaleAsciiArtToFit(const vector<string>& lines, int maxWidth, int maxHeight) {
+    if (lines.empty()) {
+        return lines;
+    }
+
+    int originalHeight = static_cast<int>(lines.size());
+    int originalWidth = 0;
+    for (const auto& line : lines) {
+        originalWidth = max(originalWidth, static_cast<int>(line.size()));
+    }
+
+    if (originalWidth <= 0) {
+        return lines;
+    }
+
+    double widthScale = (originalWidth > maxWidth) ? static_cast<double>(maxWidth) / static_cast<double>(originalWidth) : 1.0;
+    double heightScale = (originalHeight > maxHeight) ? static_cast<double>(maxHeight) / static_cast<double>(originalHeight) : 1.0;
+    double scale = min(widthScale, heightScale);
+
+    if (scale >= 1.0) {
+        return lines;
+    }
+
+    int targetWidth = max(1, static_cast<int>(originalWidth * scale));
+    int targetHeight = max(1, static_cast<int>(originalHeight * scale));
+
+    vector<string> scaled;
+    scaled.reserve(targetHeight);
+
+    for (int y = 0; y < targetHeight; ++y) {
+        int srcY = min(originalHeight - 1, static_cast<int>(y / scale));
+        const string& srcLine = lines[srcY];
+
+        string out;
+        out.reserve(targetWidth);
+
+        for (int x = 0; x < targetWidth; ++x) {
+            int srcX = min(originalWidth - 1, static_cast<int>(x / scale));
+            if (srcX < static_cast<int>(srcLine.size())) {
+                out.push_back(srcLine[srcX]);
+            } else {
+                out.push_back(' ');
+            }
+        }
+        scaled.push_back(out);
+    }
+
+    return scaled;
+}
+
 vector<string> loadAsciiArt(const string& filename) {
     vector<string> result;
     
-    // Try multiple possible paths (both relative and absolute)
+    // Try relative paths only.
     vector<string> possiblePaths = {
         "./art/" + filename + ".dat",
         "art/" + filename + ".dat",
-        "../gp/art/" + filename + ".dat",
-        // Absolute paths for Windows
-        "d:/Ashutosh Jalan Documents/HKU/COMP2113/gp/art/" + filename + ".dat",
-        "d:\\Ashutosh Jalan Documents\\HKU\\COMP2113\\gp\\art\\" + filename + ".dat",
-        // Absolute paths for WSL
-        "/mnt/d/Ashutosh Jalan Documents/HKU/COMP2113/gp/art/" + filename + ".dat"
+        "../gp/art/" + filename + ".dat"
     };
     
     for (const auto& filepath : possiblePaths) {
@@ -41,13 +93,6 @@ vector<string> loadAsciiArt(const string& filename) {
             file.close();
             return result;  // Successfully loaded
         }
-    }
-    
-    // If we get here, file not found - show which paths were tried
-    std::cerr << "Warning: Could not open ASCII art file: " << filename << ".dat" << endl;
-    std::cerr << "Tried paths:" << endl;
-    for (const auto& path : possiblePaths) {
-        std::cerr << "  - " << path << endl;
     }
     return result;
 }
@@ -97,9 +142,17 @@ void displayAsciiArt(const vector<string>& lines, const string& color) {
 
 // Display ASCII art on the right side with color
 void displayAsciiArtRight(const vector<string>& lines, const string& color) {
+    updateTerminalLayout();
+    int rightPaneWidth = max(1, TERMINAL_WIDTH - RIGHT_START + 1);
+    int maxArtHeight = max(1, TERMINAL_HEIGHT);
+    vector<string> fittedLines = scaleAsciiArtToFit(lines, rightPaneWidth, maxArtHeight);
+
+    clearRightPane();
+
     int row = 1;
-    for (const auto& line : lines) {
-        moveCursor(row, RIGHT_START);
+    for (const auto& line : fittedLines) {
+        int startCol = RIGHT_START + max(0, rightPaneWidth - static_cast<int>(line.size()));
+        moveCursor(row, startCol);
         if (!color.empty()) {
             cout << color;
         }
@@ -111,12 +164,21 @@ void displayAsciiArtRight(const vector<string>& lines, const string& color) {
 
 // Display ASCII art on the right side with glitch animation effect
 void displayAsciiArtRightAnimated(const vector<string>& lines, const string& color, int delayMs) {
-    int totalLines = static_cast<int>(lines.size());
+    updateTerminalLayout();
+    int rightPaneWidth = max(1, TERMINAL_WIDTH - RIGHT_START + 1);
+    int maxArtHeight = max(1, TERMINAL_HEIGHT);
+    vector<string> fittedLines = scaleAsciiArtToFit(lines, rightPaneWidth, maxArtHeight);
+
+    int totalLines = static_cast<int>(fittedLines.size());
     if (totalLines == 0) return;
+
+    clearRightPane();
     
     // Glitch animation: lines appear with distortion
     for (int frame = 0; frame < totalLines + 5; frame++) {
         for (int i = 0; i < totalLines; i++) {
+            moveCursor(i + 1, RIGHT_START);
+            cout << string(rightPaneWidth, ' ');
             moveCursor(i + 1, RIGHT_START);
             
             // Determine if this line should be displayed and with what effect
@@ -127,15 +189,21 @@ void displayAsciiArtRightAnimated(const vector<string>& lines, const string& col
                 // Random glitch effect on some frames
                 if (frame < totalLines && rand() % 3 == 0) {
                     // Glitch: offset some characters
-                    string glitched = lines[i];
-                    int glitchPos = rand() % glitched.length();
-                    if (glitchPos > 0) {
-                        glitched[glitchPos] = '#';
+                    string glitched = fittedLines[i];
+                    if (!glitched.empty()) {
+                        int glitchPos = rand() % glitched.length();
+                        if (glitchPos >= 0) {
+                            glitched[glitchPos] = '#';
+                        }
                     }
+                    int startCol = RIGHT_START + max(0, rightPaneWidth - static_cast<int>(glitched.size()));
+                    moveCursor(i + 1, startCol);
                     cout << glitched;
                 } else {
                     // Normal display
-                    cout << lines[i];
+                    int startCol = RIGHT_START + max(0, rightPaneWidth - static_cast<int>(fittedLines[i].size()));
+                    moveCursor(i + 1, startCol);
+                    cout << fittedLines[i];
                 }
                 
                 if (!color.empty()) cout << RESET;

@@ -270,6 +270,20 @@ void showMap(Location* root, Location* current) {
     printMapTree(root, current, 0);
 }
 
+void displayLocationArtOrDefault(const std::string& locationName, const std::string& color = "") {
+    auto art = loadAsciiArt(locationName);
+    if (art.empty()) {
+        art = loadAsciiArt("HKU_logo");
+    }
+
+    if (art.empty()) {
+        printLeftSide(std::string(YELLOW) + "[ ASCII art fallback 'HKU_logo.dat' not found in ./art/ directory ]" + RESET);
+        return;
+    }
+
+    displayAsciiArtRight(art, color);
+}
+
 void runLocationShell(Student& student, int count) {
     Location* root = buildLocationTree();
     Location* current = root;
@@ -333,6 +347,7 @@ typeText(std::string(BOLD) + RED + "Marcus challenges you to a coding battle!" +
 std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 
 clearScreen();
+displayLocationArtOrDefault(current->name);
 
     while (true) {
         
@@ -375,6 +390,7 @@ clearScreen();
             iss >> target;
             if (target.empty()) {
                 current = root;
+                displayLocationArtOrDefault(current->name);
                 continue;
             }
             Location* next = resolveLocation(current, target, root);
@@ -383,6 +399,7 @@ clearScreen();
             } else {
                 current = next;
                 printLeftSide(std::string(GREEN) + "Moved to " + current->title + " (" + current->getPath() + ")" + RESET);
+                displayLocationArtOrDefault(current->name);
             }
         } else if (command == "look") {
             printLeftSide(std::string(BOLD) + CYAN + current->title + RESET + " - " + current->description);
@@ -546,12 +563,12 @@ void startGame() {
     }
     
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "What's your name, student?");
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "What's your name, student? ");
     
     std::string name;
     std::cin >> name;
    
-    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "Nice to meet you, " + name + "! How old are you?");
+    printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "Nice to meet you, " + name + "! How old are you? ");
     int age;
     std::cin >> age;       
     printLeftSide(std::string(CYAN) + "Dr. Chim Tat Wing: " + RESET + "Great! So you're " + std::to_string(age) + " years old. Let's get you started on your university journey. Remember, I'm here to help you along the way, so don't hesitate to reach out if you need any advice or assistance. Good luck, " + name + "!");
@@ -609,6 +626,11 @@ void startGame() {
 
 // In main()
 int main() {
+
+    updateTerminalLayout();
+    std::cout << YELLOW << "[ Recommended ] Please switch your terminal to full-screen mode for the best split-screen experience." << RESET << std::endl;
+    std::cout << "Press Enter to continue...";
+    std::cin.get();
 
     hall_init(st_johns, st_johnsFile);
     hall_init(shunhing, shunhingFile);  
