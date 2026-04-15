@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall
+CXXFLAGS = -std=c++11 -Wall 
 TARGET = main
 
 OBJS = main.o student.o halls.o battle.o ascii_art.o
