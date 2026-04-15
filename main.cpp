@@ -8,15 +8,25 @@
 #include <string>
 #include <cctype>
 #include <vector>
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 #include "student.h"
 #include "halls.h"
 #include "ascii_art.h"
+#include "battle.h"
 
 // ANSI color codes
 #define RESET   "\033[0m"
 #define GREEN   "\033[32m"
 #define CYAN    "\033[36m"
 #define BOLD    "\033[1m"
+#define RED     "\033[31m"
+#define YELLOW  "\033[33m"
+#define MAGENTA "\033[35m"
 
 const int field_width = 80;
 
@@ -84,10 +94,47 @@ void clearScreen() {
 }
 
 void typeText(const std::string& text, int delayMs = 10) {
-    for (char c : text) {
-        std::cout << c << std::flush;
+    bool skipAnimation = false;
+    
+    // Set stdin to non-blocking mode on Unix-like systems
+    #ifndef _WIN32
+    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
+    #endif
+    
+    for (size_t i = 0; i < text.length(); ++i) {
+        std::cout << text[i] << std::flush;
+        
+        // Check for input to skip animation
+        #ifdef _WIN32
+        if (_kbhit()) {
+            _getch(); // Consume the key
+            skipAnimation = true;
+        }
+        #else
+        char c;
+        if (read(STDIN_FILENO, &c, 1) > 0) {
+            skipAnimation = true;
+        }
+        #endif
+        
+        if (skipAnimation) {
+            // Print remaining text instantly
+            for (size_t j = i + 1; j < text.length(); ++j) {
+                std::cout << text[j];
+            }
+            break;
+        }
+        
         std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
     }
+    
+    // Restore stdin to blocking mode on Unix-like systems
+    #ifndef _WIN32
+    int flags2 = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, flags2 & ~O_NONBLOCK);
+    #endif
+    
     std::cout << std::endl;
 }
 
@@ -171,14 +218,14 @@ Location* buildLocationTree() {
 
 void printLocationListing(const Location* current, bool showLong = false) {
     if (current->children.empty()) {
-        std::cout << "No sub-locations here." << std::endl;
+        std::cout << RED << "No sub-locations here." << RESET << std::endl;
         return;
     }
     for (const Location* child : current->children) {
         if (showLong) {
-            std::cout << child->name << " - " << child->title << ": " << child->description << std::endl;
+            std::cout << GREEN << child->name << RESET << " - " << BOLD << child->title << RESET << ": " << child->description << std::endl;
         } else {
-            std::cout << child->name << std::endl;
+            std::cout << GREEN << child->name << RESET << std::endl;
         }
     }
 }
@@ -251,17 +298,39 @@ void showMap(Location* root, Location* current) {
     printMapTree(root, current, 0);
 }
 
-void runLocationShell(Student& student) {
+void runLocationShell(Student& student, int count) {
     Location* root = buildLocationTree();
     Location* current = root;
     std::string input;
-
-    std::cout << "\nExplore HKU locations using commands like ls, cd, pwd, help, map and exit." << std::endl;
-    std::cout << "Try typing 'help' to get started." << std::endl;
-
+    if(count==0){
+    std::cout << "\n" << CYAN<<"Chim Tat Wing: "<<RESET << "Explore HKU locations using commands like"<<RED<<"  ls, cd, pwd, help, map and exit." << RESET << std::endl;
+    std::cout << CYAN << "Try typing 'help' to get started." << RESET << std::endl;
+    std::cout<<CYAN<<"Chim Tat Wing: "<<RESET<<"Type ls to see everywhere you can go"<<RESET<<std::endl;
+    std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA << "$ " << RESET;
     std::getline(std::cin, input); // clear leftover input
+    while(input!="ls"){
+        std::cout<<RED<<"Please type 'ls' to see the locations before proceeding."<<RESET<<std::endl;
+std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA << "$ " << RESET;
+    std::getline(std::cin, input); // clear leftover input
+    }
+
+    
+        printLocationListing(current);
+    
+    std::cout<<CYAN<<"Chim Tat Wing:"<<RESET<<"Good now try cd to move to a location. Let's go to the main campus and meet your peers"<<std::endl;
+    while(input!="cd main-campus"){
+        std::cout<<RED<<"Please type 'cd main-campus' to move to the main campus before proceeding."<<RESET<<std::endl;
+        std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA << "$ " << RESET;
+        std::getline(std::cin, input);
+    }
+    current = resolveLocation(current, "main-campus", root);
+    std::cout << GREEN << "Moved to " << current->title << " (" << current->getPath() << ")" << RESET << std::endl;
+    std::cout<<CYAN<<"Chim Tat Wing:"<<RESET<<"Oh! Meet Marcus, He is also a first year CDS student!"<<std::endl;
+
+
+}
     while (true) {
-        std::cout << "hku:" << current->getPath() << "$ ";
+        std::cout << BOLD << MAGENTA << "hku:" << CYAN << current->getPath() << MAGENTA << "$ " << RESET;
         std::getline(std::cin, input);
         input = trim(input);
         if (input.empty()) {
@@ -277,7 +346,7 @@ void runLocationShell(Student& student) {
             iss >> flag;
             printLocationListing(current, flag == "-l");
         } else if (command == "pwd") {
-            std::cout << current->getPath() << std::endl;
+            std::cout << GREEN << current->getPath() << RESET << std::endl;
         } else if (command == "cd") {
             std::string target;
             iss >> target;
@@ -287,21 +356,21 @@ void runLocationShell(Student& student) {
             }
             Location* next = resolveLocation(current, target, root);
             if (next == nullptr) {
-                std::cout << "No such location: " << target << std::endl;
+                std::cout << RED << "No such location: " << target << RESET << std::endl;
             } else {
                 current = next;
-                std::cout << "Moved to " << current->title << " (" << current->getPath() << ")" << std::endl;
+                std::cout << GREEN << "Moved to " << current->title << " (" << current->getPath() << ")" << RESET << std::endl;
             }
         } else if (command == "look") {
-            std::cout << current->title << " - " << current->description << std::endl;
+            std::cout << BOLD << CYAN << current->title << RESET << " - " << current->description << std::endl;
             if (current->name == "library") {
-                std::cout << "You can study here to increase your knowledge." << std::endl;
+                std::cout << YELLOW << "You can study here to increase your knowledge." << RESET << std::endl;
                 student.study();
             } else if (current->name == "canteen") {
-                std::cout << "A good place to eat and recover energy." << std::endl;
+                std::cout << YELLOW << "A good place to eat and recover energy." << RESET << std::endl;
                 student.eat();
             } else if (current->name == "garden") {
-                std::cout << "Relaxing in the garden restores your stamina." << std::endl;
+                std::cout << YELLOW << "Relaxing in the garden restores your stamina." << RESET << std::endl;
                 student.rest();
             }
         } else if (command == "map") {
@@ -310,22 +379,22 @@ void runLocationShell(Student& student) {
             clearScreen();
         }
         else if (command == "help") {
-            std::cout << "Available commands:" << std::endl;
-            std::cout << "  ls        - list locations in the current area" << std::endl;
-            std::cout << "  ls -l     - list locations with descriptions" << std::endl;
-            std::cout << "  cd <path> - move to another location (use .. to go up, / for root)" << std::endl;
-            std::cout << "  pwd       - show current location path" << std::endl;
-            std::cout << "  look      - learn more about the current location" << std::endl;
-            std::cout << "  map       - show the full campus map" << std::endl;
-            std::cout << "  status    - show your student status" << std::endl;
-            std::cout << "  exit      - leave the navigation shell" << std::endl;
+            std::cout << BOLD << CYAN << "Available commands:" << RESET << std::endl;
+            std::cout << GREEN << "  ls        " << RESET << "- list locations in the current area" << std::endl;
+            std::cout << GREEN << "  ls -l     " << RESET << "- list locations with descriptions" << std::endl;
+            std::cout << GREEN << "  cd <path> " << RESET << "- move to another location (use .. to go up, / for root)" << std::endl;
+            std::cout << GREEN << "  pwd       " << RESET << "- show current location path" << std::endl;
+            std::cout << GREEN << "  look      " << RESET << "- learn more about the current location" << std::endl;
+            std::cout << GREEN << "  map       " << RESET << "- show the full campus map" << std::endl;
+            std::cout << GREEN << "  status    " << RESET << "- show your student status" << std::endl;
+            std::cout << GREEN << "  exit      " << RESET << "- leave the navigation shell" << std::endl;
         } else if (command == "status") {
             student.displayStatus();
         } else if (command == "exit" || command == "quit") {
-            std::cout << "Exiting HKU navigation." << std::endl;
+            std::cout << YELLOW << "Exiting HKU navigation." << RESET << std::endl;
             break;
         } else {
-            std::cout << "Unknown command: " << command << ". Type help for a list of commands." << std::endl;
+            std::cout << RED << "Unknown command: " << command << ". Type help for a list of commands." << RESET << std::endl;
         }
     }
 
@@ -462,7 +531,7 @@ void startGame() {
     typeText("Welcome to the prestigious " CYAN "University of Hong Kong!" RESET "    You are about to embark on an exciting journey as a student at HKU.\nYour choices will shape your university experience, so choose wisely and enjoy your time at HKU!\n\n", 30);
     typeText(CYAN "Dr. Chim Tat Wing:" RESET " Hello there! Welcome to HKU. I'm Dr. Chim Tat Wing, your friendly advisor. I'm here to help you navigate your university life and make the most of your time here. Feel free to ask me anything or seek advice whenever you need it. Let's make your HKU experience unforgettable!\"\n\n", 30);
     typeText(CYAN "Dr. Chim Tat Wing: " RESET "What's your name, student?", 30);
-
+    
     std::string name;
     std::cin >> name;
    
@@ -513,7 +582,7 @@ void startGame() {
     }
 
     std::cout << "\nWelcome to the HKU navigation shell. You can move around campus using commands like ls, cd, and pwd." << std::endl;
-    runLocationShell(s);
+    runLocationShell(s,0);
 }
 
 // In main()
