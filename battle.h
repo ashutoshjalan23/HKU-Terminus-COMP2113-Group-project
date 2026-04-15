@@ -24,6 +24,7 @@ public:
     void useMove();
     void moveDescription();
     void applyEffects(Student& s, Student& opponent);
+    string getName() const;
 
     };
 
