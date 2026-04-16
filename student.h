@@ -30,7 +30,8 @@ public:
     void socialize();
     void rest();
     void displayStatus();
-    
+    void setMoveSet(const vector<moves>& newMoveSet);
+    void updateMoveSet( int index, const moves& newMove);
     int getMoney() const;
     void addMoney(int amount);
     void deductMoney(int amount);

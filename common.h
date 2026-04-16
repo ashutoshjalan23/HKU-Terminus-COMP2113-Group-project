@@ -16,5 +16,5 @@ void updateTerminalLayout();
 void moveCursor(int row, int col);
 void printLeftSide(const string& text);
 void clearScreen();
-
+void clearLine();
 #endif

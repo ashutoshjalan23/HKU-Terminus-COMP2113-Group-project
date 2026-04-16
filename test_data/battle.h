@@ -23,9 +23,9 @@ public:
     moves(string mt, string n, int d, int h, const vector<string>& e, string desc);
     void useMove();
     void moveDescription();
-    void applyEffects(Student& s, Student& opponent);
+   
     string getName() const;
-
+    void applyEffects(Student& s, Student& opponent);
     };
 
 
