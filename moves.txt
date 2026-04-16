@@ -1,0 +1,9 @@
+Attack,print,20,0,-1,Sends a stream of characters to Attack
+Attack,SegFault,50,-30,-1, High Risk High chance move to shut down your opponent
+Defense,Debug,0,20,-1,Heal yourself
+Heal,Garbage Collector,0,0,remove,Remove effects from moves and gives you another chance
+Special,;,0,0,skip,Makes the opponent forget his ; skipping his move
+Special,Hash Set,0, Allows you to use your opponent moves for 1 turn 
+Special,67,100,0,one shot your opponent
+Special,Claude Make no mistakes,,0,random, random Attack
+Special,Coffee,0,0,boost, boost all your stats temporarily

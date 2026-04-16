@@ -30,7 +30,7 @@ public:
     void socialize();
     void rest();
     void displayStatus();
-    
+    void takeDamage(int h);
     int getMoney() const;
     void addMoney(int amount);
     void deductMoney(int amount);

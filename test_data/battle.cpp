@@ -1,8 +1,10 @@
 #include<iostream>
 #include "battle.h"
+#include "common.h"
 #include "student.h"
 #include <cstdlib>  
 #include<fstream>
+#include<chrono>
 using namespace std;
 
 moves::moves(string mt, string n, int d, int h, const vector<string>& e, string desc) {
@@ -34,17 +36,19 @@ void moves::moveDescription() {
 void moves::applyEffects(Student& s, Student& opponent) {
     if (damage > 0) {
         cout << opponent.getName() << " takes " << damage << " damage!\n";
-        
+        opponent.takeDamage(damage);
     }
     if (heal > 0) {
         cout << s.getName() << " heals for " << heal << " health!\n";
-        
+        s.takeDamage(-heal);
     }
     for (const string& effect : effects) {
         cout << s.getName() << " is affected by " << effect << "!\n";
    
     }
 }
+
+
 
 string moves::getName() const {
     return name;
@@ -87,16 +91,33 @@ for(const moves& i: playerMoves){
 cout<<"\033[39;1H";
 
 cout<<"Enter the number of your move: "<<flush<<endl;
-cout<<"\033[2K";
+clearLine();    
 int moveChoice;
 cin>>moveChoice;
 
 if(moveChoice<1 || moveChoice>4){
-    cout<<"\033[2K";
-    cout<<"invalid move choice. Please choose a valid move."<<flush;
+    clearLine();
+    cout<<"\rinvalid move choice. Please choose a valid move."<<flush;
+
+    std::chrono::seconds(2);
+
+    moves opp_move= opponentMoves[rand()%4];
+    clearLine();
+
+    cout<<opp_move.getName()<<" is used by the opponent!"<<flush;
+    opp_move.applyEffects(opponent, player);
+
+    std::chrono::seconds(2);
     continue;
 }
-cout<<"\033[2K";
-cout<<"User played move: "<<playerMoves[moveChoice-1].getName()<<endl;
+clearLine();
+moves player_move= playerMoves[moveChoice-1];
+cout<<"User played move: "<<player_move.getName()<<endl;
+player_move.applyEffects(player, opponent);
+std::chrono::seconds(2);
+moves opp_move= opponentMoves[rand()%4];
+clearLine();
+cout<<opp_move.getName()<<" is used by the opponent!"<<flush;
+opp_move.applyEffects(opponent, player);
 }
 }

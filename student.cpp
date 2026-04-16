@@ -17,7 +17,8 @@ Student::Student(string n, int a) {
     moveSet={moves("Print Statement","Output", 18, 0, {"Display"}, "A basic attack that outputs powerful damage."),
              moves("If Statement","Conditional", 14, 0, {"Check"}, "A conditional attack that evaluates and executes."),
              moves("For Loop","Iteration", 10, 5, {"Repeat"}, "A repeating attack that gains strength through iterations."),
-             moves("Function Call","Subroutine", 0, 25, {"Support"}, "Calls a helper function to restore significant health.")}; // Introductory programming moves
+             moves("Function Call","Subroutine", 0, 25, {"Support"}, "Calls a helper function to restore significant health.")}; 
+             // Introductory programming moves
 }
 
 
@@ -92,3 +93,12 @@ const vector<moves>& Student::getMoveSet() const {
     return moveSet;
 }
     
+void Student::setMoveSet(const vector<moves>& newMoveSet) {
+    moveSet = newMoveSet;
+}
+
+void Student::updateMoveSet( int index, const moves& newMove) {
+    if(index>=0 && index<=4){
+        moveSet[index]=newMove;
+    }
+}

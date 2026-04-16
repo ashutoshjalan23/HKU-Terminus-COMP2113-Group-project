@@ -19,7 +19,7 @@ Student::Student(string n, int a) {
             moves("attack","Segmentation Fault",20,0,{"none"},"A powerful attack that causes a segmentation fault, dealing heavy damage to the opponent."),
             moves("attack","Memory Leak",15,0,{"none"},"An attack that causes a memory leak, dealing damage.")
         };
-        }; // Introductory programming moves
+} // Introductory programming moves
 
 
 
@@ -50,6 +50,12 @@ void Student::rest() {
        
 }
 
+void Student::takeDamage(int h) {
+    health -= h;
+    if (health < 0) health = 0; 
+    
+    if(health>100) health=100;
+}
 
 void Student::displayStatus() {
     cout << "\nStatus of " << name << ":\n";

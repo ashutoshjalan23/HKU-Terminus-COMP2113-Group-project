@@ -621,6 +621,7 @@ void startGame() {
     }
 
     std::cout << "\nWelcome to the HKU navigation shell. You can move around campus using commands like ls, cd, and pwd." << std::endl;
+    clearScreen();
     runLocationShell(s,0);
 }
 

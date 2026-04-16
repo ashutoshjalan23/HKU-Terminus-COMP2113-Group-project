@@ -110,6 +110,10 @@ void printLeftSide(const string& text) {
     }
 }
 
+void clearLine(){
+    cout<<"\033[2K";
+}
+
 void clearScreen() {
     updateTerminalLayout();
 #ifdef _WIN32
