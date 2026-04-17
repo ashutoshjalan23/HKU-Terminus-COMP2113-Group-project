@@ -21,10 +21,6 @@ Student::Student(string n, int a) {
              // Introductory programming moves
 }
 
-
-
-
-
 void Student::study() {
     cout << name << " is studying.\n";
     knowledge += 5;   

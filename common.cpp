@@ -114,6 +114,13 @@ void clearLine(){
     cout<<"\033[2K";
 }
 
+void clearLeftPaneRow(int row) {
+    updateTerminalLayout();
+    moveCursor(row, 1);
+    cout << string(LEFT_WIDTH, ' ') << flush;
+    moveCursor(row, 1);
+}
+
 void clearScreen() {
     updateTerminalLayout();
 #ifdef _WIN32

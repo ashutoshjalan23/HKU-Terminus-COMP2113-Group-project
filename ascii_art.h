@@ -20,6 +20,4 @@ void displayAsciiArtRight(const vector<string>& lines, const string& color = "")
 
 void displayAsciiArtRightAnimated(const vector<string>& lines, const string& color = "", int delayMs = 50);
 
-vector<string> getTitleLines();
-
 #endif // ASCII_ART_H

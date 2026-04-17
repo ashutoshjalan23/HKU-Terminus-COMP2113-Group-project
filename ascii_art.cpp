@@ -12,6 +12,7 @@ using namespace std;
 // Color codes
 #define RESET       "\033[0m"
 #define CYAN        "\033[38;5;110m"
+#define YELLOW      "\033[38;5;179m"
 
 static void clearRightPane() {
     updateTerminalLayout();
@@ -94,6 +95,11 @@ vector<string> loadAsciiArt(const string& filename) {
             return result;  // Successfully loaded
         }
     }
+
+    if (result.empty() && (filename=="HKU_logo" || filename=="rival2")){
+        printLeftSide(std::string(YELLOW) + "[ ASCII art file ' " + filename + "' not found in ./art/ directory ]" + RESET);
+    }
+
     return result;
 }
 
@@ -213,12 +219,4 @@ void displayAsciiArtRightAnimated(const vector<string>& lines, const string& col
         
         std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
     }
-}
-
-vector<string> getTitleLines() {
-    auto lines = loadAsciiArt("HKU_logo");
-     if (lines.empty()) {
-        lines.push_back("[ ASCII art file 'HKU_logo.dat' not found in ./art/ directory ]");
-    }
-    return lines;
 }
